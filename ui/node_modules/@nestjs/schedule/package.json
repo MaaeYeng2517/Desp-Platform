@@ -1,0 +1,74 @@
+{
+  "name": "@nestjs/schedule",
+  "version": "12.0.2",
+  "description": "Nest - modern, fast, powerful node.js web framework (@schedule)",
+  "author": "Kamil Mysliwiec",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "url": "https://github.com/nestjs/schedule#readme",
+  "scripts": {
+    "build": "rimraf -rf dist && tsc -p tsconfig.json",
+    "format": "prettier **/**/*.ts --ignore-path ./.prettierignore --write",
+    "lint": "oxlint lib/",
+    "prepublish:npm": "npm run build",
+    "publish:npm": "npm publish --access public",
+    "prepublish:next": "npm run build",
+    "publish:next": "npm publish --access public --tag next",
+    "test:integration": "vitest run",
+    "prerelease": "npm run build",
+    "release": "release-it"
+  },
+  "dependencies": {
+    "cron": "4.4.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.2",
+    "@commitlint/config-angular": "21.2.2",
+    "@nestjs/common": "12.0.1",
+    "@nestjs/core": "12.0.1",
+    "@nestjs/platform-express": "12.0.1",
+    "@nestjs/testing": "12.0.1",
+    "@types/node": "24.13.4",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1",
+    "oxlint": "1.82.0",
+    "prettier": "3.9.6",
+    "reflect-metadata": "0.2.2",
+    "release-it": "21.0.2",
+    "rimraf": "6.1.3",
+    "rxjs": "7.8.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
+    "vitest": "5.0.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0 || ^12.0.0",
+    "@nestjs/core": "^11.0.0 || ^12.0.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nestjs/schedule"
+  }
+}
