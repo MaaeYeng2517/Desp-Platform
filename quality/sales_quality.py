@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine, text
+from os import getenv
 
 
 DATABASE_URL = (
-    "postgresql+psycopg2://"
-    "dataeng:dataeng@localhost:5432/datawarehouse"
+    f"postgresql+psycopg2://"
+    f"dataeng:{getenv('PGPASSWORD', 'dataeng')}"
+    f"@{getenv('DB_HOST', 'postgres')}:5432/datawarehouse"
 )
 
 
