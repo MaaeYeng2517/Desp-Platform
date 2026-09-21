@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: dataeng
       POSTGRES_DB: datawarehouse
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
