@@ -1,14 +1,26 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
     origin: true,
     credentials: true,
+  });
+
+  const publicPath = join(__dirname, '..', 'public');
+  app.useStaticAssets(publicPath);
+  app.get('/', (_req: Request, res: Response) => {
+    res.sendFile(join(publicPath, 'index.html'));
+  });
+  app.get('/studio', (_req: Request, res: Response) => {
+    res.sendFile(join(publicPath, 'index.html'));
   });
 
   app.useGlobalPipes(
@@ -22,8 +34,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Data Engineering Platform API')
-    .setDescription('API for monitoring and managing data pipelines')
+    .setTitle('Knowledge Base Studio API')
+    .setDescription('Visual knowledge pipeline, metadata, vector search, and RAG API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

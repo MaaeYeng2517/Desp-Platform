@@ -6,6 +6,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { PipelineModule } from './modules/pipeline/pipeline.module';
 import { QualityModule } from './modules/quality/quality.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { KnowledgeBaseModule } from './modules/knowledge-base/knowledge-base.module';
 import { databaseConfig } from './config/database.config';
 import { appConfig } from './config/app.config';
 
@@ -36,6 +37,7 @@ import { appConfig } from './config/app.config';
     PipelineModule,
     QualityModule,
     SalesModule,
+    KnowledgeBaseModule,
   ],
 })
 export class AppModule {}

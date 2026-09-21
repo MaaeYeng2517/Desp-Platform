@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --runInBand --passWithNoTests"
   },
   "keywords": [],
   "author": "",
