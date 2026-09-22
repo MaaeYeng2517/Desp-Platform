@@ -24,11 +24,11 @@ DEWP เป็นแพลตฟอร์ม Data Engineering แบบเปิ
 
 ```mermaid
 graph TD;
-    DATA -> PIPELINE;
-    PIPELINE -> QUALITY;
-    QUALITY -> WAREHOUSE;
-    WAREHOUSE -> ANALYTICS;
-    ANALYTICS -> AI;
+    DATA --> PIPELINE;
+    PIPELINE --> QUALITY;
+    QUALITY --> WAREHOUSE;
+    WAREHOUSE --> ANALYTICS;
+    ANALYTICS --> AI;
 ```
 
 แพลตฟอร์มรองรับขั้นตอนการทำงานแบบต่อเนื่อง:
