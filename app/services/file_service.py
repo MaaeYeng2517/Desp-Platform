@@ -1,7 +1,22 @@
+import hashlib
+import io
+import pandas as pd
+from datetime import datetime
+from typing import Optional, List, Dict, Any, Tuple
+from uuid import UUID
+
+from fastapi import UploadFile
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from minio import Minio
 
-class FileUploadService:
+from app.core.config import settings
+from app.core.minio_client import ensure_bucket
+from app.models.dataset import Dataset
+from app.models.file_record import FileRecord
+from app.schemas.file_upload import FileUploadResponse
+from app.services.audit_service import AuditService
     """Service for handling file uploads to MinIO and tracking metadata."""
 
     def __init__(self, db: AsyncSession):

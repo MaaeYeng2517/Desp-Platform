@@ -12,7 +12,7 @@ class FileRecord(Base):
     __tablename__ = "files"
     __table_args__ = {"schema": "core"}
 
-    id = PG_UUID(as_uuid=True, primary_key=True, default=uuid4)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     dataset_id = Column(PG_UUID(as_uuid=True), ForeignKey("core.datasets.id"), nullable=False)
     filename = Column(String(500), nullable=False)
     file_path = Column(String(500), nullable=False)

@@ -11,7 +11,7 @@ class QualityRule(Base):
     __tablename__ = "quality_rules"
     __table_args__ = {"schema": "core"}
 
-    id = PG_UUID(as_uuid=True, primary_key=True, default=uuid4)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     dataset_id = Column(PG_UUID(as_uuid=True), ForeignKey("core.datasets.id"), nullable=False)
     name = Column(String(255), nullable=False)
     rule_type = Column(String(50), nullable=False)
@@ -25,7 +25,7 @@ class QualityResult(Base):
     __tablename__ = "quality_results"
     __table_args__ = {"schema": "core"}
 
-    id = PG_UUID(as_uuid=True, primary_key=True, default=uuid4)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     dataset_id = Column(PG_UUID(as_uuid=True), ForeignKey("core.datasets.id"), nullable=False)
     rule_id = Column(PG_UUID(as_uuid=True), ForeignKey("core.quality_rules.id"), nullable=True)
     rule_name = Column(String(255), nullable=False)

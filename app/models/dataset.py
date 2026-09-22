@@ -22,7 +22,7 @@ class Dataset(Base):
     __tablename__ = "datasets"
     __table_args__ = {"schema": "core"}
 
-    id = PG_UUID(as_uuid=True, primary_key=True, default=uuid4)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     name = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=True)
     source_type = Column(String(50), nullable=False)

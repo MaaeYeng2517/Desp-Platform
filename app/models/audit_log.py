@@ -12,7 +12,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
     __table_args__ = {"schema": "core"}
 
-    id = PG_UUID(as_uuid=True, primary_key=True, default=uuid4)
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     dataset_id = Column(PG_UUID(as_uuid=True), ForeignKey("core.datasets.id"), nullable=True)
     action = Column(String(100), nullable=False)
     resource_type = Column(String(100), nullable=False)
