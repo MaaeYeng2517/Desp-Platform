@@ -47,7 +47,8 @@ export class PipelineService {
         },
       };
     } catch (error) {
-      return { error: error.message };
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: message };
     }
   }
 
@@ -62,7 +63,7 @@ export class PipelineService {
     ]);
 
     const latestRun = runs[0];
-    let tasks = [];
+    let tasks: Awaited<ReturnType<AirflowService['getTaskInstances']>> = [];
     if (latestRun) {
       tasks = await this.airflowService.getTaskInstances(dagId, latestRun.run_id);
     }

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RawSale } from '../entities/raw-sale.entity';
-import { StagingSale } from '../entities/staging-sale.entity';
-import { MartSale } from '../entities/mart-sale.entity';
+import { RawSale } from '../../entities/raw-sale.entity';
+import { StagingSale } from '../../entities/staging-sale.entity';
+import { MartSale } from '../../entities/mart-sale.entity';
 import { MinioService, MinioObject, PresignedUrlOptions } from './minio.service';
 import { IcebergService, IcebergTable, IcebergSchema } from './iceberg.service';
 

@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Client, BucketItem, PolicyType } from 'minio';
+import { Client, BucketItem } from 'minio';
 import { Readable } from 'stream';
 
 export interface MinioBucket {
@@ -114,7 +114,7 @@ export class MinioService implements OnModuleInit {
     metaData?: Record<string, string>,
   ): Promise<string> {
     const etag = await this.client.putObject(bucketName, objectName, stream, size, metaData);
-    return etag;
+    return etag.etag;
   }
 
   async uploadFile(
@@ -124,7 +124,7 @@ export class MinioService implements OnModuleInit {
     metaData?: Record<string, string>,
   ): Promise<string> {
     const etag = await this.client.fPutObject(bucketName, objectName, filePath, metaData);
-    return etag;
+    return etag.etag;
   }
 
   async downloadFile(
@@ -188,7 +188,7 @@ export class MinioService implements OnModuleInit {
         const policy = this.client.newPostPolicy();
         policy.setBucket(bucketName);
         policy.setKey(objectName);
-        policy.setExpires(expiry);
+        policy.setExpires(new Date(Date.now() + expiry * 1000));
         const { postURL, formData } = await this.client.presignedPostPolicy(policy);
         return JSON.stringify({ url: postURL, formData });
       default:
@@ -201,10 +201,12 @@ export class MinioService implements OnModuleInit {
     bucketName: string,
     policy: 'public' | 'private' | 'readonly',
   ): Promise<void> {
-    const policyType = policy === 'public' ? PolicyType.READ_WRITE : 
-                       policy === 'readonly' ? PolicyType.READ_ONLY : 
-                       PolicyType.NONE;
-    await this.client.setBucketPolicy(bucketName, '', policyType);
+    const policyDocument = policy === 'public'
+      ? JSON.stringify({ Version: '2012-10-17', Statement: [{ Effect: 'Allow', Principal: '*', Action: ['s3:GetObject'], Resource: [`arn:aws:s3:::${bucketName}/*`] }] })
+      : policy === 'readonly'
+        ? JSON.stringify({ Version: '2012-10-17', Statement: [{ Effect: 'Allow', Principal: '*', Action: ['s3:GetObject'], Resource: [`arn:aws:s3:::${bucketName}/*`] }] })
+        : JSON.stringify({ Version: '2012-10-17', Statement: [] });
+    await this.client.setBucketPolicy(bucketName, policyDocument);
   }
 
   async getBucketPolicy(bucketName: string): Promise<string> {

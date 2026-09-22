@@ -405,7 +405,7 @@ export class IcebergService {
     const desc = await this.describeTable(tableName, namespace);
     // Parse location from DESCRIBE output
     const lines = desc.split('\n');
-    const locationLine = lines.find(l => l.includes('Location:'));
+    const locationLine = lines.find((line: string) => line.includes('Location:'));
     return locationLine ? locationLine.split('Location:')[1].trim() : '';
   }
 }

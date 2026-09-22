@@ -111,7 +111,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     await admin.connect();
     const lag = await admin.fetchTopicOffsets(topic);
     await admin.disconnect();
-    return lag.reduce((acc, partition) => acc + (partition.high - partition.low), 0);
+    return lag.reduce((acc, partition) => acc + (Number(partition.high) - Number(partition.low)), 0);
   }
 
   async getClusterInfo(): Promise<{ brokers: any[]; controller: any }> {

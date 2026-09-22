@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MartSale } from '../entities/mart-sale.entity';
-import { StagingSale } from '../entities/staging-sale.entity';
-import { RawSale } from '../entities/raw-sale.entity';
+import { MartSale } from '../../entities/mart-sale.entity';
+import { StagingSale } from '../../entities/staging-sale.entity';
+import { RawSale } from '../../entities/raw-sale.entity';
 
 export interface QualityCheck {
   name: string;
@@ -143,12 +143,13 @@ export class QualityService {
         const result = await this.runCheck(check);
         results.push(result);
       } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
         results.push({
           check,
           value: -1,
           passed: false,
           timestamp: new Date(),
-          details: { error: error.message },
+          details: { error: message },
         });
       }
     }

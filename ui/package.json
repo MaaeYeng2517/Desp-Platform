@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nestjs/axios": "^12.0.1",
     "@nestjs/common": "^12.0.3",
     "@nestjs/config": "^12.0.0",
     "@nestjs/core": "^12.0.3",
@@ -21,8 +22,11 @@
     "@nestjs/schedule": "^12.0.2",
     "@nestjs/swagger": "^12.0.1",
     "@nestjs/typeorm": "^12.0.1",
+    "axios": "^1.20.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "kafkajs": "^2.2.4",
+    "minio": "^8.0.7",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -37,6 +41,6 @@
     "@types/node": "^26.6.2",
     "jest": "^30.5.2",
     "ts-node": "^10.9.2",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }
