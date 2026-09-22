@@ -270,7 +270,8 @@ class QualityService:
         )
         return result.scalars().all()
 
-    async def get_default_quality_rules(dataset_name: str) -> List[Dict[str, Any]]:
+    @staticmethod
+    def get_default_quality_rules(dataset_name: str) -> List[Dict[str, Any]]:
         if dataset_name == "sales":
             return [
                 {

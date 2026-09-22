@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +27,10 @@ class Settings(BaseSettings):
     MINIO_BUCKET_BRONZE: str = "bronze"
     MINIO_BUCKET_SILVER: str = "silver"
     MINIO_BUCKET_GOLD: str = "gold"
+
+    OPENLINEAGE_ENDPOINT: str = os.getenv("OPENLINEAGE_ENDPOINT", "http://localhost:5000")
+    OPENLINEAGE_API_KEY: Optional[str] = os.getenv("OPENLINEAGE_API_KEY")
+    OPENLINEAGE_NAMESPACE: str = os.getenv("OPENLINEAGE_NAMESPACE", "data-core-platform")
 
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000

@@ -10,3 +10,5 @@ python-multipart==0.0.18
 minio==7.2.0
 pandas==3.0.2
 aiofiles==24.1.0
+prometheus-client==0.26.0
+openlineage-python==1.8.0

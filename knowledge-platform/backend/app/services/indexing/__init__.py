@@ -165,17 +165,17 @@ class MetadataIndex:
     """Metadata filtering index"""
     
     def __init__(self):
-        self.index: Dict[str, Dict] = {}
+        self._store: Dict[str, Dict] = {}
     
     def index(self, doc_id: str, metadata: Dict):
         """Index document metadata"""
-        self.index[doc_id] = metadata
+        self._store[doc_id] = metadata
     
     def search(self, filters: Dict[str, Any], limit: int = 10) -> List[str]:
         """Search by metadata filters"""
         results = []
         
-        for doc_id, metadata in self.index.items():
+        for doc_id, metadata in self._store.items():
             match = True
             
             for key, value in filters.items():
@@ -192,7 +192,7 @@ class MetadataIndex:
     
     def delete(self, doc_id: str):
         """Remove from index"""
-        self.index.pop(doc_id, None)
+        self._store.pop(doc_id, None)
 
 
 class GraphIndex:

@@ -8,11 +8,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.minio_client import ensure_bucket
 from app.models.dataset import Dataset
 from app.models.file_record import FileRecord
 from app.models.metadata import DatasetMetadata
 from app.services.audit_service import AuditService
 from app.schemas.metadata import DatasetMetadataCreate, SchemaColumn
+
+from minio import Minio
 
 
 class MetadataService:
@@ -90,8 +93,6 @@ class MetadataService:
         return metadata
 
     def _extract_from_file(self, file_record: FileRecord) -> tuple[List[Dict[str, Any]], int]:
-        from minio import Minio
-
         client = Minio(
             endpoint=settings.MINIO_ENDPOINT,
             access_key=settings.MINIO_ACCESS_KEY,
