@@ -1,1 +1,0 @@
-"""Knowledge Engineering Platform - Backend"""
