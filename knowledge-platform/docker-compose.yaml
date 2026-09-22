@@ -73,16 +73,53 @@ services:
       - elasticsearch
       - qdrant
     environment:
-      - DATABASE_URL=postgresql+asyncpg://ke_user:ke_password@postgres:5432/knowledge_platform
-      - MINIO_ENDPOINT=minio:9000
-      - REDIS_URL=redis://redis:6379/0
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - QDRANT_URL=http://qdrant:6333
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@postgres:5432/knowledge_platform}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
+      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
+      - API_KEY_HASH_SECRET=${API_KEY_HASH_SECRET:-development-only-change-me}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:3000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8000}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL:-http://localhost:3000/billing?checkout=success}
+      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL:-http://localhost:3000/billing?checkout=cancelled}
+      - SAAS_PLANS=${SAAS_PLANS:-}
+      - DEBUG=${DEBUG:-false}
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app/backend
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ke-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 
   worker:
     build:
@@ -96,11 +133,18 @@ services:
       - elasticsearch
       - qdrant
     environment:
-      - DATABASE_URL=postgresql+asyncpg://ke_user:ke_password@postgres:5432/knowledge_platform
-      - MINIO_ENDPOINT=minio:9000
-      - REDIS_URL=redis://redis:6379/0
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
-      - QDRANT_URL=http://qdrant:6333
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@postgres:5432/knowledge_platform}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
+      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
+      - API_KEY_HASH_SECRET=${API_KEY_HASH_SECRET:-development-only-change-me}
+      - DEBUG=${DEBUG:-false}
     volumes:
       - ./workers:/app/workers
     command: python workers/worker.py
