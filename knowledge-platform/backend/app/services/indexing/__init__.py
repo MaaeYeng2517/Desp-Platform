@@ -1,8 +1,11 @@
 """Indexing layer for hybrid search"""
 from typing import Any, Dict, List, Optional
 import logging
-import hashlib
+import numpy as np
 from datetime import datetime
+
+from backend.app.services.embedding import embedding_service
+from backend.app.services.chunking import token_chunker
 
 logger = logging.getLogger(__name__)
 
@@ -54,66 +57,108 @@ class KeywordIndex:
 
 
 class VectorIndex:
-    """Vector index using Qdrant"""
-    
+    """Vector index for token-embedded chunks."""
+
     def __init__(self):
         self.collection_name = "knowledge_chunks"
         self.embeddings: Dict[str, List[float]] = {}
-    
+        self.chunk_store: Dict[str, Dict[str, Any]] = {}
+        self._service = embedding_service
+        self.dim = self._service.vector_size
+
     def _generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding vector (simplified)"""
-        # In production, use actual embedding model
-        # This is a placeholder using text hashing
-        import numpy as np
-        
-        hash_val = hashlib.md5(text.encode()).hexdigest()
-        # Create deterministic vector from hash
-        np.random.seed(int(hash_val[:8], 16))
-        return np.random.rand(384).tolist()
-    
+        """Generate embedding vector via the embedding service."""
+        return self._service.embed_query(text)
+
     def index(self, chunk_id: str, content: str, metadata: Dict = None):
-        """Index a chunk with vector embedding"""
+        """Index a chunk with a real token embedding."""
         embedding = self._generate_embedding(content)
         self.embeddings[chunk_id] = embedding
-    
-    def search(self, query: str, limit: int = 10, 
+        self.chunk_store[chunk_id] = {
+            "content": content,
+            "metadata": metadata or {},
+            "indexed_at": datetime.utcnow().isoformat(),
+        }
+
+    def index_chunks(
+        self,
+        chunks: List[Dict[str, Any]],
+        prefix: str = "chunk_",
+    ) -> List[str]:
+        """Batch-index a list of chunk dicts (from TokenChunker)."""
+        ids: List[str] = []
+        texts = [c.get("content", "") for c in chunks]
+        embeddings = self._service.embed(texts)
+
+        for chunk, emb in zip(chunks, embeddings):
+            chunk_id = chunk.get("chunk_id") or chunk.get("id") or f"{prefix}{len(ids)}"
+            self.embeddings[chunk_id] = emb
+            self.chunk_store[chunk_id] = {
+                "content": chunk.get("content", ""),
+                "metadata": chunk.get("metadata", {}),
+                "token_count": chunk.get("token_count", 0),
+                "chunk_index": chunk.get("chunk_index", 0),
+                "indexed_at": datetime.utcnow().isoformat(),
+            }
+            ids.append(chunk_id)
+
+        logger.info("Indexed %d chunks", len(ids))
+        return ids
+
+    def search(self, query: str, limit: int = 10,
                metadata_filter: Dict = None) -> List[Dict[str, Any]]:
-        """Vector similarity search"""
+        """Vector similarity search with metadata filtering."""
         query_embedding = self._generate_embedding(query)
         results = []
-        
+
         for chunk_id, embedding in self.embeddings.items():
-            # Cosine similarity
             similarity = self._cosine_similarity(query_embedding, embedding)
-            
+
+            doc = self.chunk_store.get(chunk_id, {})
+            content = doc.get("content", "")
+            metadata = doc.get("metadata", metadata_filter or {})
+
+            if metadata_filter:
+                if not self._matches_filter(metadata, metadata_filter):
+                    continue
+
             results.append({
                 "chunk_id": chunk_id,
-                "score": similarity,
-                "metadata": metadata_filter or {}
+                "doc_id": metadata.get("doc_id", chunk_id),
+                "score": round(similarity, 6),
+                "content": content,
+                "metadata": metadata,
+                "token_count": doc.get("token_count", 0),
             })
-        
+
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:limit]
-    
+
+    def _matches_filter(self, metadata: Dict, filt: Dict) -> bool:
+        """Check if metadata matches the filter."""
+        for key, value in filt.items():
+            if key not in metadata or metadata[key] != value:
+                return False
+        return True
+
     def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
-        """Calculate cosine similarity"""
-        import numpy as np
-        
-        v1 = np.array(vec1)
-        v2 = np.array(vec2)
-        
-        dot_product = np.dot(v1, v2)
-        norm_v1 = np.linalg.norm(v1)
-        norm_v2 = np.linalg.norm(v2)
-        
+        """Calculate cosine similarity (embeddings are L2-normalised)."""
+        v1 = np.array(vec1, dtype=np.float64)
+        v2 = np.array(vec2, dtype=np.float64)
+
+        dot_product = float(np.dot(v1, v2))
+        norm_v1 = float(np.linalg.norm(v1))
+        norm_v2 = float(np.linalg.norm(v2))
+
         if norm_v1 == 0 or norm_v2 == 0:
             return 0.0
-        
-        return float(dot_product / (norm_v1 * norm_v2))
-    
+
+        return dot_product / (norm_v1 * norm_v2)
+
     def delete(self, chunk_id: str):
-        """Remove chunk from index"""
+        """Remove chunk from index."""
         self.embeddings.pop(chunk_id, None)
+        self.chunk_store.pop(chunk_id, None)
 
 
 class MetadataIndex:
