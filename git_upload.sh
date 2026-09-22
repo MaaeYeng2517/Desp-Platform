@@ -3,5 +3,5 @@
 # Licensed under the MIT License
 
 git add .
-git commit -m "add project"
+git commit -m "$1"
 git push origin main
