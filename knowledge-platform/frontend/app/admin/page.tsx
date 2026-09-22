@@ -16,16 +16,16 @@ interface Filters {
 }
 
 const stats = [
-  { label: 'ผู้ใช้งาน', get: (value: AdminStats) => value.total_users, format: formatNumber },
-  { label: 'พื้นที่ทำงาน', get: (value: AdminStats) => value.total_tenants, format: formatNumber },
-  { label: 'สมาชิกทั้งหมด', get: (value: AdminStats) => value.total_subscriptions, format: formatNumber },
-  { label: 'สมาชิกใช้งานได้', get: (value: AdminStats) => value.active_subscriptions, format: formatNumber },
-  { label: 'API Keys', get: (value: AdminStats) => `${value.active_api_keys}/${value.total_api_keys}`, format: (value: string) => value },
-  { label: 'API calls วันนี้', get: (value: AdminStats) => value.total_api_calls_today, format: formatNumber },
-  { label: 'API calls เดือนนี้', get: (value: AdminStats) => value.total_api_calls_month, format: formatNumber },
-  { label: 'รายได้สะสม', get: (value: AdminStats) => formatMoney(value.revenue_cents, 'THB'), format: (value: string) => value },
-  { label: 'ข้อความติดต่อ', get: (value: AdminStats) => value.contact_messages, format: formatNumber },
-  { label: 'รอดำเนินการ', get: (value: AdminStats) => value.pending_contact_messages, format: formatNumber },
+  { label: 'ผู้ใช้งาน', get: (value: AdminStats) => value.total_users, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'พื้นที่ทำงาน', get: (value: AdminStats) => value.total_tenants, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'สมาชิกทั้งหมด', get: (value: AdminStats) => value.total_subscriptions, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'สมาชิกใช้งานได้', get: (value: AdminStats) => value.active_subscriptions, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'API Keys', get: (value: AdminStats) => `${value.active_api_keys}/${value.total_api_keys}`, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'API calls วันนี้', get: (value: AdminStats) => value.total_api_calls_today, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'API calls เดือนนี้', get: (value: AdminStats) => value.total_api_calls_month, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'รายได้สะสม', get: (value: AdminStats) => formatMoney(value.revenue_cents, 'THB'), format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'ข้อความติดต่อ', get: (value: AdminStats) => value.contact_messages, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
+  { label: 'รอดำเนินการ', get: (value: AdminStats) => value.pending_contact_messages, format: (value: number | string) => typeof value === 'number' ? formatNumber(value) : value },
 ] as const;
 
 export function AdminContent() {

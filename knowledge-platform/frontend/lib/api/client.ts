@@ -33,10 +33,12 @@ export function setCsrfToken(token: string): void {
   window.sessionStorage.setItem(CSRF_SESSION_KEY, token);
 }
 
-export function clearAuthClientState(): void {
+export function clearAuthClientState(notify = true): void {
   if (typeof window === 'undefined') return;
   window.sessionStorage.removeItem(CSRF_SESSION_KEY);
-  window.dispatchEvent(new CustomEvent(AUTH_CHANGE_EVENT));
+  if (notify) {
+    window.dispatchEvent(new CustomEvent(AUTH_CHANGE_EVENT));
+  }
 }
 
 function getCsrfToken(): Promise<string> {
@@ -98,7 +100,7 @@ api.interceptors.response.use(
       request.url.includes('/api/v1/auth/logout') ||
       request.url.includes('/api/v1/auth/verify-csrf')
     ) {
-      clearAuthClientState();
+      clearAuthClientState(false);
       return Promise.reject(error);
     }
 
@@ -110,7 +112,7 @@ api.interceptors.response.use(
       }
       return api(request);
     } catch (refreshError) {
-      clearAuthClientState();
+      clearAuthClientState(false);
       return Promise.reject(refreshError);
     }
   },
