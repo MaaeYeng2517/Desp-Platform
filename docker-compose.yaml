@@ -1,41 +1,7 @@
-# Copyright (c) 2026 Data Engineering Workflow Platform
-# Licensed under the MIT License
+version: '3.8'
 
-# Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
-#
-# WARNING: This configuration is for local development. Do not use it in a production deployment.
-#
-# This configuration supports basic configuration using environment variables or an .env file
-# The following variables are supported:
-#
-# AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:3.3.2
-# AIRFLOW_UID                  - User ID in Airflow containers
-#                                Default: 50000
-# AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
-#                                Default: .
-# Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
-#
-# _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
-#                                Default: airflow
-# _AIRFLOW_WWW_USER_PASSWORD   - Password for the administrator account (if requested).
-#                                Default: airflow
-# _PIP_ADDITIONAL_REQUIREMENTS - Additional PIP requirements to add when starting all containers.
-#                                Use this option ONLY for quick checks. Installing requirements at container
-#                                startup is done EVERY TIME the service is started.
-#                                A better way is to build a custom image or extend the official image
-#                                as described in https://airflow.apache.org/docs/docker-stack/build.html.
-#                                Default: ''
-#
-# Feel free to modify this file to suit your needs.
----
-x-airflow-common:
-  &airflow-common
-  # In order to add custom dependencies or upgrade provider distributions you can use your extended image.
-  # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
-  # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
+x-airflow-common: &airflow-common
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.3.2}
-  # build: .
   env_file:
     - ${ENV_FILE_PATH:-.env}
   environment:
@@ -51,15 +17,8 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-airflow_jwt_secret}
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
-    # yamllint disable rule:line-length
-    # Use simple http server on scheduler for health checks
-    # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
-    # yamllint enable rule:line-length
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
-    # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-mem0==1.1.0 pyspark==4.0.0 minio==7.2.0 openlineage-airflow==1.8.0 apache-airflow-providers-postgres==5.9.0}
-    # The following line can be used to set a custom config file, stored in the local config folder
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
@@ -80,6 +39,9 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+# ============================================================
+# Airflow Cluster (from docker-compose.yaml)
+# ============================================================
   postgres:
     image: postgres:16
     environment:
@@ -95,7 +57,6 @@ services:
       start_period: 5s
     restart: always
 
-  # Data Warehouse PostgreSQL (separate from Airflow metadata DB)
   datawarehouse:
     image: postgres:16
     environment:
@@ -114,8 +75,6 @@ services:
     restart: always
 
   redis:
-    # Redis is limited to 7.2-bookworm due to licencing change
-    # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
     image: redis:7.2-bookworm
     expose:
       - 6379
@@ -127,7 +86,6 @@ services:
       start_period: 30s
     restart: always
 
-  # MinIO Object Storage (Data Lake)
   minio:
     image: minio/minio:RELEASE.2024-01-16T16-07-28Z
     command: server /data --console-address ":9001"
@@ -147,7 +105,6 @@ services:
       start_period: 30s
     restart: always
 
-  # MinIO bucket initialization
   minio-init:
     image: minio/mc:RELEASE.2024-01-16T16-07-28Z
     depends_on:
@@ -214,7 +171,6 @@ services:
     <<: *airflow-common
     command: celery worker
     healthcheck:
-      # yamllint disable rule:line-length
       test: ["CMD-SHELL", 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"']
       interval: 30s
       timeout: 10s
@@ -222,8 +178,6 @@ services:
       start_period: 30s
     environment:
       <<: *airflow-common-env
-      # Required to handle warm shutdown of the celery workers properly
-      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
     restart: always
     depends_on:
@@ -251,7 +205,6 @@ services:
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
-    # yamllint disable rule:line-length
     command:
       - -c
       - |
@@ -329,8 +282,6 @@ services:
         echo "Files in shared volumes:"
         echo
         ls -la /opt/airflow/{logs,dags,plugins,config}
-
-    # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
@@ -347,7 +298,6 @@ services:
     environment:
       <<: *airflow-common-env
       CONNECTION_CHECK_MAX_COUNT: "0"
-    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
     command:
       - bash
       - -c
@@ -355,9 +305,6 @@ services:
     depends_on:
       <<: *airflow-common-depends-on
 
-  # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
-  # or by explicitly targeted on the command line e.g. docker-compose up flower.
-  # See: https://docs.docker.com/compose/profiles/
   flower:
     <<: *airflow-common
     command: celery flower
@@ -411,7 +358,6 @@ services:
         condition: service_healthy
     restart: always
 
-  # Prometheus for metrics collection
   prometheus:
     image: prom/prometheus:v2.53.0
     ports:
@@ -427,7 +373,6 @@ services:
       - '--web.enable-lifecycle'
     restart: always
 
-  # Grafana for visualization
   grafana:
     image: grafana/grafana:11.0.0
     ports:
@@ -444,7 +389,51 @@ services:
       - prometheus
     restart: always
 
-  # Data Core Platform API (FastAPI)
+# ============================================================
+# Atlas (from docker-compose.yaml, profile: atlas)
+# ============================================================
+  atlas:
+    image: ${ATLAS_IMAGE:-sburn/apache-atlas:2.3.0}
+    container_name: de-atlas
+    profiles:
+      - atlas
+    environment:
+      ATLAS_SERVER_HEAP: ${ATLAS_SERVER_HEAP:-1536m}
+      ATLAS_USERNAME: ${ATLAS_USERNAME:-admin}
+      ATLAS_PASSWORD: ${ATLAS_PASSWORD:-admin}
+    ports:
+      - "${ATLAS_PORT:-21000}:21000"
+    volumes:
+      - atlas-data:/apache-atlas/data
+      - atlas-logs:/apache-atlas/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u ${ATLAS_USERNAME:-admin}:${ATLAS_PASSWORD:-admin} http://localhost:21000/api/atlas/admin/version >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  atlas-init:
+    image: curlimages/curl:8.10.1
+    container_name: de-atlas-init
+    profiles:
+      - atlas
+    environment:
+      ATLAS_ENDPOINT: http://atlas:21000
+      ATLAS_USERNAME: ${ATLAS_USERNAME:-admin}
+      ATLAS_PASSWORD: ${ATLAS_PASSWORD:-admin}
+    volumes:
+      - ./atlas/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    depends_on:
+      atlas:
+        condition: service_healthy
+    restart: "no"
+
+# ============================================================
+# API Service (FastAPI) - from docker-compose.yaml (unnamed service)
+# ============================================================
   api:
     build:
       context: .
@@ -462,6 +451,9 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
       MINIO_SECURE: "false"
+      ATLAS_ENDPOINT: http://atlas:21000
+      ATLAS_USERNAME: ${ATLAS_USERNAME:-admin}
+      ATLAS_PASSWORD: ${ATLAS_PASSWORD:-admin}
     depends_on:
       datawarehouse:
         condition: service_healthy
@@ -469,9 +461,259 @@ services:
         condition: service_healthy
     restart: always
 
+# ============================================================
+# Embedded Analytics API - from docker-compose.yaml
+# ============================================================
+  embedded:
+    build:
+      context: .
+      dockerfile: Dockerfile.embedded
+    container_name: de-embedded
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://dataeng:dataeng@datawarehouse:5432/datawarehouse
+      EMBED_BASE_URL: http://localhost:8080
+      API_BASE_URL: http://localhost:8080
+      ALLOWED_ORIGINS: '["*"]'
+      EMBED_TOKEN_SECRET: ${EMBED_TOKEN_SECRET:-change-me-in-production}
+    depends_on:
+      datawarehouse:
+        condition: service_healthy
+    restart: always
+
+# ============================================================
+# Data Warehouse Stack (from docker-compose.yml)
+# ============================================================
+  postgres-secondary:
+    image: postgres:17
+    container_name: de-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dataeng
+      POSTGRES_PASSWORD: dataeng
+      POSTGRES_DB: datawarehouse
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio-secondary:
+    image: quay.io/minio/minio
+    container_name: de-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123456
+      ATLAS_ENDPOINT: http://atlas:21000
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  atlas-secondary:
+    image: sburn/apache-atlas:2.3.0
+    container_name: de-atlas
+    environment:
+      ATLAS_SERVER_HEAP: 1536m
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
+    ports:
+      - "21000:21000"
+    volumes:
+      - atlas_data:/apache-atlas/data
+      - atlas_logs:/apache-atlas/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u admin:admin http://localhost:21000/api/atlas/admin/version >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  atlas-init-secondary:
+    image: curlimages/curl:8.10.1
+    container_name: de-atlas-init
+    environment:
+      ATLAS_ENDPOINT: http://atlas-secondary:21000
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
+    volumes:
+      - ./atlas/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    depends_on:
+      atlas-secondary:
+        condition: service_healthy
+    restart: "no"
+
+# ============================================================
+# Knowledge Platform (from knowledge-platform/docker-compose.yaml)
+# ============================================================
+  ke-postgres:
+    image: postgres:16
+    container_name: ke-postgres
+    environment:
+      POSTGRES_DB: knowledge_platform
+      POSTGRES_USER: ke_user
+      POSTGRES_PASSWORD: ke_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ke_postgres_data:/var/lib/postgresql/data
+      - ./knowledge-platform/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ke_user -d knowledge_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ke-minio:
+    image: minio/minio:latest
+    container_name: ke-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ke_minio_data:/data
+
+  ke-redis:
+    image: redis:7-alpine
+    container_name: ke-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ke_redis_data:/data
+    command: redis-server --appendonly yes
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ke-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ke-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  ke-backend:
+    build:
+      context: ./knowledge-platform
+      dockerfile: docker/backend.Dockerfile
+    container_name: ke-backend
+    depends_on:
+      - ke-postgres
+      - ke-minio
+      - ke-redis
+      - elasticsearch
+      - qdrant
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@ke-postgres:5432/knowledge_platform}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-ke-minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - REDIS_URL=${REDIS_URL:-redis://ke-redis:6379/0}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
+      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
+      - API_KEY_HMAC_SECRET=${API_KEY_HMAC_SECRET:-development-only-change-me}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:3000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8000}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL:-http://localhost:3000/billing?checkout=success}
+      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL:-http://localhost:3000/billing?checkout=cancelled}
+      - SAAS_PLANS=${SAAS_PLANS:-}
+      - DEBUG=${DEBUG:-false}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./knowledge-platform/backend:/app/backend
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ke-frontend:
+    build:
+      context: ./knowledge-platform/frontend
+      dockerfile: Dockerfile
+      target: frontend
+    container_name: ke-frontend
+    depends_on:
+      ke-backend:
+        condition: service_healthy
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  ke-worker:
+    build:
+      context: ./knowledge-platform
+      dockerfile: docker/worker.Dockerfile
+    container_name: ke-worker
+    depends_on:
+      - ke-postgres
+      - ke-minio
+      - ke-redis
+      - elasticsearch
+      - qdrant
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@ke-postgres:5432/knowledge_platform}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-ke-minio:9000}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - REDIS_URL=${REDIS_URL:-redis://ke-redis:6379/0}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
+      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
+      - API_KEY_HMAC_SECRET=${API_KEY_HMAC_SECRET:-development-only-change-me}
+      - DEBUG=${DEBUG:-false}
+    volumes:
+      - ./knowledge-platform/workers:/app/workers
+    command: python workers/worker.py
+
 volumes:
   postgres-db-volume:
   datawarehouse-db-volume:
   minio-data:
   prometheus-data:
   grafana-data:
+  atlas-data:
+  atlas-logs:
+  postgres_data:
+  minio_data:
+  ke_postgres_data:
+  ke_minio_data:
+  ke_redis_data:
+  es_data:
+  qdrant_data:

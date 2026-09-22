@@ -83,7 +83,7 @@ services:
       - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
-      - API_KEY_HASH_SECRET=${API_KEY_HASH_SECRET:-development-only-change-me}
+      - API_KEY_HMAC_SECRET=${API_KEY_HMAC_SECRET:-development-only-change-me}
       - ADMIN_EMAILS=${ADMIN_EMAILS:-}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:3000}
@@ -143,7 +143,7 @@ services:
       - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-development-only-change-me}
-      - API_KEY_HASH_SECRET=${API_KEY_HASH_SECRET:-development-only-change-me}
+      - API_KEY_HMAC_SECRET=${API_KEY_HMAC_SECRET:-development-only-change-me}
       - DEBUG=${DEBUG:-false}
     volumes:
       - ./workers:/app/workers

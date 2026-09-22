@@ -21,12 +21,52 @@ services:
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: minio123456
+      ATLAS_ENDPOINT: http://atlas:21000
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
       - minio_data:/data
 
+  atlas:
+    image: sburn/apache-atlas:2.3.0
+    container_name: de-atlas
+    environment:
+      ATLAS_SERVER_HEAP: 1536m
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
+    ports:
+      - "21000:21000"
+    volumes:
+      - atlas_data:/apache-atlas/data
+      - atlas_logs:/apache-atlas/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u admin:admin http://localhost:21000/api/atlas/admin/version >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  atlas-init:
+    image: curlimages/curl:8.10.1
+    container_name: de-atlas-init
+    environment:
+      ATLAS_ENDPOINT: http://atlas:21000
+      ATLAS_USERNAME: admin
+      ATLAS_PASSWORD: admin
+    volumes:
+      - ./atlas/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    depends_on:
+      atlas:
+        condition: service_healthy
+    restart: "no"
+
 volumes:
   postgres_data:
   minio_data:
+  atlas_data:
+  atlas_logs:

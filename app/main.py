@@ -1,20 +1,32 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import api_router
 from app.core.config import settings
-from app.core.database import engine
-from app.core.minio_client import ensure_all_buckets
+from app.core.database import engine, init_db
+from app.core.minio_client import ensure_all_buckets, get_minio_client
+from app.services.monitoring_service import MonitoringState
 
-from minio import Minio
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(__import__("app.core.database", fromlist=["Base"]).Base.metadata.create_all)
+    from minio import Minio
+    minio_client = get_minio_client()
+    ensure_all_buckets(minio_client)
+    yield
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="Data Core Platform API - A unified API for dataset management, file upload, validation, cleaning, transformation, quality checks, metadata management, and audit logging.",
+    description="Data Core Platform API - A unified API for dataset management, file upload, validation, cleaning, transformation, quality checks, metadata management, audit logging, monitoring, lineage tracking, and data serving.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/api/openapi.json",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -26,20 +38,6 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
-
-
-@app.on_event("startup")
-async def startup_event():
-    from app.core.database import init_db
-    await init_db()
-
-    client = Minio(
-        endpoint=settings.MINIO_ENDPOINT,
-        access_key=settings.MINIO_ACCESS_KEY,
-        secret_key=settings.MINIO_SECRET_KEY,
-        secure=settings.MINIO_SECURE,
-    )
-    ensure_all_buckets(client)
 
 
 @app.get("/health")
@@ -64,5 +62,8 @@ async def root():
             "quality": "/api/v1/quality",
             "metadata": "/api/v1/metadata",
             "audit": "/api/v1/audit",
+            "monitoring": "/api/v1/monitor",
+            "lineage": "/api/v1/lineage",
+            "serving": "/api/v1/serve",
         },
     }

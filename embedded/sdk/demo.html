@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEWP Embedded Analytics Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #1a1a2e; margin-bottom: 24px; }
+        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h2 { color: #374151; margin-bottom: 16px; font-size: 18px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-right: 8px; margin-bottom: 8px; }
+        .btn:hover { background: #2563eb; }
+        .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .input { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; width: 300px; margin-right: 8px; }
+        .embed-container { border: 2px dashed #d1d5db; border-radius: 8px; min-height: 400px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #6b7280; }
+        .embed-container iframe { width: 100%; height: 100%; border: none; border-radius: 6px; }
+        .status { padding: 8px 12px; border-radius: 6px; font-size: 14px; margin-top: 12px; display: none; }
+        .status.success { background: #dcfce7; color: #166534; display: block; }
+        .status.error { background: #fee2e2; color: #991b1b; display: block; }
+        .code { background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; overflow-x: auto; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DEWP Embedded Analytics Demo</h1>
+        
+        <div class="card">
+            <h2>Configuration</h2>
+            <input type="text" id="apiBase" class="input" placeholder="API Base URL" value="http://localhost:8080">
+            <input type="text" id="dashboardId" class="input" placeholder="Dashboard ID" value="sales-overview">
+            <input type="text" id="chartId" class="input" placeholder="Chart ID" value="daily-revenue">
+            <button class="btn" id="initBtn">Initialize SDK</button>
+            <div id="initStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2>Embed Dashboard</h2>
+            <button class="btn" id="embedDashboardBtn" disabled>Create Token & Embed Dashboard</button>
+            <button class="btn" id="refreshDashboardBtn" disabled>Refresh Token</button>
+            <div id="dashboardStatus" class="status"></div>
+            <div id="dashboardContainer" class="embed-container">Dashboard will appear here</div>
+        </div>
+
+        <div class="card">
+            <h2>Embed Chart</h2>
+            <button class="btn" id="embedChartBtn" disabled>Create Token & Embed Chart</button>
+            <button class="btn" id="refreshChartBtn" disabled>Refresh Token</button>
+            <div id="chartStatus" class="status"></div>
+            <div id="chartContainer" class="embed-container" style="min-height: 300px;">Chart will appear here</div>
+        </div>
+
+        <div class="card">
+            <h2>Usage Example</h2>
+            <pre class="code"><code>// Initialize SDK
+const analytics = new DEWPEmbeddedAnalytics({
+  apiBase: 'http://localhost:8080'
+});
+
+// Create embed token for dashboard
+const token = await analytics.createToken({ 
+  dashboardId: 'sales-overview',
+  expiresIn: 3600 
+});
+
+// Embed dashboard in container
+analytics.embedDashboard({
+  container: 'dashboard-container',
+  embedUrl: token.embedUrl,
+  onLoad: () => console.log('Dashboard loaded!'),
+  onError: (err) => console.error('Failed to load:', err)
+});</code></pre>
+        </div>
+    </div>
+
+    <script src="embedded-analytics.js"></script>
+    <script>
+        let analytics = null;
+        let dashboardIframe = null;
+        let chartIframe = null;
+
+        const apiBaseInput = document.getElementById('apiBase');
+        const dashboardIdInput = document.getElementById('dashboardId');
+        const chartIdInput = document.getElementById('chartId');
+        const initBtn = document.getElementById('initBtn');
+        const initStatus = document.getElementById('initStatus');
+        
+        const embedDashboardBtn = document.getElementById('embedDashboardBtn');
+        const refreshDashboardBtn = document.getElementById('refreshDashboardBtn');
+        const dashboardStatus = document.getElementById('dashboardStatus');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        
+        const embedChartBtn = document.getElementById('embedChartBtn');
+        const refreshChartBtn = document.getElementById('refreshChartBtn');
+        const chartStatus = document.getElementById('chartStatus');
+        const chartContainer = document.getElementById('chartContainer');
+
+        function showStatus(el, message, isError = false) {
+            el.textContent = message;
+            el.className = 'status ' + (isError ? 'error' : 'success');
+        }
+
+        initBtn.addEventListener('click', () => {
+            try {
+                analytics = new EmbeddedAnalytics({
+                    apiBase: apiBaseInput.value,
+                    defaultTokenExpiry: 3600
+                });
+                showStatus(initStatus, 'SDK initialized successfully!');
+                embedDashboardBtn.disabled = false;
+                embedChartBtn.disabled = false;
+            } catch (err) {
+                showStatus(initStatus, 'Failed to initialize: ' + err.message, true);
+            }
+        });
+
+        embedDashboardBtn.addEventListener('click', async () => {
+            if (!analytics) return;
+            
+            embedDashboardBtn.disabled = true;
+            showStatus(dashboardStatus, 'Creating embed token...');
+            
+            try {
+                const token = await analytics.createToken({ 
+                    dashboardId: dashboardIdInput.value 
+                });
+                
+                dashboardIframe = analytics.embedDashboard({
+                    container: dashboardContainer,
+                    embedUrl: token.embedUrl,
+                    height: '600px',
+                    onLoad: () => showStatus(dashboardStatus, 'Dashboard loaded successfully!'),
+                    onError: (err) => showStatus(dashboardStatus, 'Error: ' + err.message, true)
+                });
+                
+                refreshDashboardBtn.disabled = false;
+            } catch (err) {
+                showStatus(dashboardStatus, 'Error: ' + err.message, true);
+                embedDashboardBtn.disabled = false;
+            }
+        });
+
+        refreshDashboardBtn.addEventListener('click', async () => {
+            if (!analytics || !dashboardIframe) return;
+            
+            try {
+                await analytics.refreshToken(dashboardIframe, { 
+                    dashboardId: dashboardIdInput.value 
+                });
+                showStatus(dashboardStatus, 'Token refreshed!');
+            } catch (err) {
+                showStatus(dashboardStatus, 'Error: ' + err.message, true);
+            }
+        });
+
+        embedChartBtn.addEventListener('click', async () => {
+            if (!analytics) return;
+            
+            embedChartBtn.disabled = true;
+            showStatus(chartStatus, 'Creating embed token...');
+            
+            try {
+                const token = await analytics.createToken({ 
+                    chartId: chartIdInput.value 
+                });
+                
+                chartIframe = analytics.embedChart({
+                    container: chartContainer,
+                    embedUrl: token.embedUrl,
+                    height: '400px',
+                    onLoad: () => showStatus(chartStatus, 'Chart loaded successfully!'),
+                    onError: (err) => showStatus(chartStatus, 'Error: ' + err.message, true)
+                });
+                
+                refreshChartBtn.disabled = false;
+            } catch (err) {
+                showStatus(chartStatus, 'Error: ' + err.message, true);
+                embedChartBtn.disabled = false;
+            }
+        });
+
+        refreshChartBtn.addEventListener('click', async () => {
+            if (!analytics || !chartIframe) return;
+            
+            try {
+                await analytics.refreshToken(chartIframe, { 
+                    chartId: chartIdInput.value 
+                });
+                showStatus(chartStatus, 'Token refreshed!');
+            } catch (err) {
+                showStatus(chartStatus, 'Error: ' + err.message, true);
+            }
+        });
+    </script>
+</body>
+</html>

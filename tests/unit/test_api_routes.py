@@ -8,13 +8,14 @@ class TestAPIRoutes:
     """Test API route registration and basic responses."""
 
     @pytest.fixture
-    def client(self):
-        with patch("app.main.init_db", new_callable=AsyncMock):
-            with patch("app.main.ensure_all_buckets"):
-                from app.main import app
-                app.dependency_overrides = {}
-                with TestClient(app) as c:
-                    yield c
+    def client(self, monkeypatch):
+        monkeypatch.setattr("app.core.database.init_db", AsyncMock())
+        monkeypatch.setattr("app.core.minio_client.ensure_all_buckets", lambda x: None)
+
+        from app.main import app
+        app.dependency_overrides = {}
+        with TestClient(app) as c:
+            yield c
 
     def test_root(self, client):
         response = client.get("/")
@@ -46,3 +47,6 @@ class TestAPIRoutes:
         assert "/api/v1/quality/rules/{dataset_id}" in spec["paths"]
         assert "/api/v1/metadata/{dataset_id}/record" in spec["paths"]
         assert "/api/v1/audit/" in spec["paths"]
+        assert "/api/v1/monitor/status" in spec["paths"]
+        assert "/api/v1/lineage/events" in spec["paths"]
+        assert "/api/v1/serve/query" in spec["paths"]

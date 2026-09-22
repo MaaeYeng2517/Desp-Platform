@@ -44,7 +44,7 @@ AI
 * **Orchestrate** — จัดการ Pipeline ด้วย Apache Airflow
 * **Store** — เก็บข้อมูลใน Data Lake (MinIO) และ Data Warehouse (PostgreSQL)
 * **Monitor** — ติดตามสถานะ Pipeline, Metrics และ Alerts ด้วย Prometheus + Grafana
-* **Track** — ติดตาม Data Lineage ด้วย OpenLineage
+* **Track** — ติดตาม Data Lineage ด้วย OpenLineage และ Apache Atlas
 * **Serve** — ส่งข้อมูลต่อให้ BI, ML, AI และ Knowledge Platform
 
 ---
@@ -62,8 +62,9 @@ AI
 | Data Quality | Automated quality checks (duplicates, nulls, ranges, business rules) |
 | Distributed Processing | Apache Spark (master + worker) สำหรับข้อมูลขนาดใหญ่ |
 | Monitoring | Prometheus (metrics) + Grafana (dashboards) |
-| Data Lineage | OpenLineage integration ผ่าน Airflow plugin |
+| Data Lineage | OpenLineage integration ผ่าน Airflow plugin และ Apache Atlas metadata catalog |
 | AI / RAG | Knowledge Platform สำหรับ AI Agent และ Vector Search |
+| Embedded Analytics | REST API + JavaScript SDK สำหรับ embed dashboards/charts ในแอปภายนอก |
 
 ---
 
@@ -99,8 +100,9 @@ AI
 | Distributed Processing | Apache Spark 3.5 |
 | Quality | Python SQL checks |
 | Lineage | OpenLineage |
-| Catalog | DataHub |
+| Catalog | Apache Atlas |
 | Monitoring | Prometheus / Grafana |
+| Embedded Analytics | FastAPI / Chart.js / JavaScript SDK |
 | Version Control | Git |
 | CI/CD | GitHub Actions |
 
@@ -143,6 +145,7 @@ flowchart TB
     GOLD["GOLD Business Ready"]
     WAREHOUSE["DATA WAREHOUSE PostgreSQL"]
     CONSUMPTION["BI / Analytics / ML / AI"]
+    EMBEDDED["EMBEDDED ANALYTICS"]
 
     SOURCES --> INGEST
     INGEST --> LAKE
@@ -153,6 +156,7 @@ flowchart TB
     QUALITY --> GOLD
     GOLD --> WAREHOUSE
     WAREHOUSE --> CONSUMPTION
+    WAREHOUSE --> EMBEDDED
 ```
 
 ---
@@ -219,6 +223,19 @@ data-engineering-platform/
 │   ├── backend/
 │   ├── frontend/
 │   └── docker/
+│
+├── embedded/
+│   ├── main.py
+│   ├── config.py
+│   ├── database.py
+│   ├── models.py
+│   ├── seed.py
+│   ├── requirements.txt
+│   └── sdk/
+│       ├── embedded-analytics.js
+│       ├── embedded-analytics.d.ts
+│       ├── package.json
+│       └── demo.html
 │
 ├── mobile/
 │
@@ -318,6 +335,9 @@ AIRFLOW__API_AUTH__JWT_SECRET=airflow_jwt_secret
 
 ```bash
 docker compose up -d
+
+# เปิด Apache Atlas และ seed metadata ตัวอย่าง
+docker compose --profile atlas up -d atlas atlas-init
 ```
 
 ตรวจสอบสถานะคอนเทนเจอร์:
@@ -346,9 +366,15 @@ docker compose down
 | `MINIO_ACCESS_KEY` | `minioadmin` | MinIO access key |
 | `MINIO_SECRET_KEY` | `minioadmin` | MinIO secret key |
 | `MINIO_SECURE` | `false` | ใช้ HTTPS หรือไม่ |
+| `ATLAS_ENDPOINT` | `http://localhost:21000` | Apache Atlas API endpoint |
+| `ATLAS_USERNAME` | `admin` | Apache Atlas UI/API username |
+| `ATLAS_PASSWORD` | `admin` | Apache Atlas UI/API password |
 | `DB_HOST` | `postgres` | PostgreSQL host |
 | `PGPASSWORD` | `dataeng` | PostgreSQL password |
 | `SPARK_MASTER` | `spark://spark-master:7077` | Spark master URL |
+| `EMBED_TOKEN_SECRET` | `change-me-in-production` | Secret key สำหรับ embed token signing |
+| `EMBED_BASE_URL` | `http://localhost:8080` | Base URL สำหรับ embed URLs |
+| `ALLOWED_ORIGINS` | `["*"]` | Allowed CORS origins สำหรับ embedded analytics |
 
 ---
 
@@ -457,9 +483,126 @@ psql -U dataeng -d datawarehouse
 * **Username:** `admin`
 * **Password:** `admin`
 
-### 13.5 Prometheus
+### 13.5 Apache Atlas
+
+* **URL:** `http://localhost:21000`
+* **Username:** `admin`
+* **Password:** `admin`
+* **Seed entities:** `atlas-init` creates the `raw`, `raw.sales`, and sales column metadata after Atlas is healthy
+
+### 13.6 Prometheus
 
 * **URL:** `http://localhost:9090`
+
+---
+
+## 13.7 Embedded Analytics API
+
+* **URL:** `http://localhost:8080`
+* **API Docs:** `http://localhost:8080/docs`
+
+---
+
+## 13.8 Embedded Analytics Usage
+
+### 13.8.1 เริ่มต้น Embedded Analytics Service
+
+```bash
+docker compose up -d embedded
+```
+
+### 13.8.2 สร้าง Sample Dashboards และ Charts
+
+```bash
+python embedded/seed.py
+```
+
+### 13.8.3 ใช้งานผ่าน JavaScript SDK
+
+ติดตั้ง SDK:
+
+```bash
+npm install @dewp/embedded-sdk
+```
+
+หรือใช้ผ่าน CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/MaaeYeng2517/data-engineering-platform@main/embedded/sdk/embedded-analytics.js"></script>
+```
+
+ตัวอย่างการใช้งาน:
+
+```javascript
+// Initialize SDK
+const analytics = new DEWPEmbeddedAnalytics({
+  apiBase: 'http://localhost:8080'
+});
+
+// สร้าง embed token สำหรับ dashboard
+const token = await analytics.createToken({ 
+  dashboardId: 'sales-overview',
+  expiresIn: 3600  // 1 ชั่วโมง
+});
+
+// Embed dashboard ใน container
+analytics.embedDashboard({
+  container: 'dashboard-container',
+  embedUrl: token.embedUrl,
+  onLoad: () => console.log('Dashboard loaded!'),
+  onError: (err) => console.error('Failed to load:', err)
+});
+
+// Embed chart เดี่ยว
+const chartToken = await analytics.createToken({ 
+  chartId: 'daily-revenue' 
+});
+
+analytics.embedChart({
+  container: 'chart-container',
+  embedUrl: chartToken.embedUrl,
+});
+```
+
+### 13.7.4 Embed ผ่าน iframe โดยตรง
+
+```html
+<iframe 
+  src="http://localhost:8080/embed/dashboard/sales-overview?token=YOUR_EMBED_TOKEN"
+  width="100%" 
+  height="600px"
+  frameborder="0"
+  allowfullscreen>
+</iframe>
+
+<iframe 
+  src="http://localhost:8080/embed/chart/daily-revenue?token=YOUR_EMBED_TOKEN"
+  width="100%" 
+  height="400px"
+  frameborder="0"
+  allowfullscreen>
+</iframe>
+```
+
+### 13.7.5 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/v1/embed/tokens` | สร้าง embed token |
+| `GET` | `/api/v1/embed/dashboards` | รายการ dashboards ทั้งหมด |
+| `GET` | `/api/v1/embed/dashboards/{id}` | รายละเอียด dashboard |
+| `GET` | `/api/v1/embed/charts` | รายการ charts ทั้งหมด |
+| `GET` | `/api/v1/embed/charts/{id}` | รายละเอียด chart |
+| `GET` | `/api/v1/embed/charts/{id}/data` | ข้อมูล chart (ต้องใช้ token) |
+| `GET` | `/embed/dashboard/{id}` | Embed dashboard HTML page |
+| `GET` | `/embed/chart/{id}` | Embed chart HTML page |
+
+### 13.7.6 Security Features
+
+* **Token-based Authentication**: ทุก embed request ต้องใช้ token
+* **Token Expiry**: Token มีอายุการใช้งาน (default 1 ชั่วโมง)
+* **Domain Restriction**: จำกัด domain ที่สามารถ embed ได้
+* **CORS Support**: รองรับ CORS สำหรับ cross-origin embedding
 
 ---
 

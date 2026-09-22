@@ -1,0 +1,27 @@
+{
+  "name": "@dewp/embedded-sdk",
+  "version": "1.0.0",
+  "description": "JavaScript SDK for DEWP Embedded Analytics",
+  "main": "embedded-analytics.js",
+  "types": "embedded-analytics.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "embedded",
+    "analytics",
+    "dashboard",
+    "charts",
+    "dewp"
+  ],
+  "author": "Data Engineering Workflow Platform",
+  "license": "MIT",
+  "peerDependencies": {
+    "chart.js": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

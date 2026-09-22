@@ -33,7 +33,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
 LLM_EMBEDDING_MODEL = os.getenv("LLM_EMBEDDING_MODEL", "text-embedding-3-small")
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "development-only-change-me")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "development-only-change-me-1234567890abcdef")
 JWT_ALGORITHM = "HS256"
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 JWT_REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "30"))
@@ -60,8 +60,8 @@ COOKIE_SECURE = os.getenv("COOKIE_SECURE", "true" if IS_PRODUCTION else "false")
 COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "lax").lower()
 if COOKIE_SAMESITE not in {"lax", "strict", "none"}:
     raise ValueError("COOKIE_SAMESITE must be lax, strict, or none")
-CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY", "development-only-change-me")
-API_KEY_HMAC_SECRET = os.getenv("API_KEY_HMAC_SECRET", "development-only-change-me")
+CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY", "development-only-change-me-1234567890abcdef")
+API_KEY_HMAC_SECRET = os.getenv("API_KEY_HMAC_SECRET", "development-only-change-me-1234567890abcdef")
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
@@ -136,11 +136,11 @@ def validate_production_config() -> None:
     if not IS_PRODUCTION:
         return
 
-    if not JWT_SECRET_KEY or JWT_SECRET_KEY == "development-only-change-me":
+    if not JWT_SECRET_KEY or JWT_SECRET_KEY == "development-only-change-me-1234567890abcdef":
         errors.append("JWT_SECRET_KEY must be set in production")
-    if not CSRF_SECRET_KEY or CSRF_SECRET_KEY == "development-only-change-me":
+    if not CSRF_SECRET_KEY or CSRF_SECRET_KEY == "development-only-change-me-1234567890abcdef":
         errors.append("CSRF_SECRET_KEY must be set in production")
-    if not API_KEY_HMAC_SECRET or API_KEY_HMAC_SECRET == "development-only-change-me":
+    if not API_KEY_HMAC_SECRET or API_KEY_HMAC_SECRET == "development-only-change-me-1234567890abcdef":
         errors.append("API_KEY_HMAC_SECRET must be set in production")
     if not STRIPE_SECRET_KEY:
         errors.append("STRIPE_SECRET_KEY must be set in production")

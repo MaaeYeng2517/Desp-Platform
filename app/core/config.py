@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     OPENLINEAGE_ENDPOINT: str = os.getenv("OPENLINEAGE_ENDPOINT", "http://localhost:5000")
     OPENLINEAGE_API_KEY: Optional[str] = os.getenv("OPENLINEAGE_API_KEY")
     OPENLINEAGE_NAMESPACE: str = os.getenv("OPENLINEAGE_NAMESPACE", "data-core-platform")
+    ATLAS_ENDPOINT: str = os.getenv("ATLAS_ENDPOINT", "http://localhost:21000")
+    ATLAS_USERNAME: str = os.getenv("ATLAS_USERNAME", "admin")
+    ATLAS_PASSWORD: str = os.getenv("ATLAS_PASSWORD", "admin")
 
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000
