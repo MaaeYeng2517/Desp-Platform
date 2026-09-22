@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowledge Base Studio</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">KB</div>
+        <div>
+          <div class="brand-title">Knowledge Base Studio</div>
+          <div class="brand-subtitle">Visual knowledge pipeline builder</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div id="connection-status" class="connection-status"><span class="status-dot"></span><span>Local workspace</span></div>
+        <button id="new-workflow" class="button button-quiet" type="button">New workflow</button>
+        <button id="save-workflow" class="button button-primary" type="button">Save workspace</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="palette-panel panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Component palette</p>
+            <h1>Drag to canvas</h1>
+          </div>
+          <span id="palette-count" class="count-badge">0</span>
+        </div>
+        <div id="palette" class="palette"></div>
+        <div class="palette-help">
+          <div class="help-icon">i</div>
+          <p>Select a component, drag it into the canvas, then connect components in pipeline order.</p>
+        </div>
+      </aside>
+
+      <section class="canvas-panel panel">
+        <div class="canvas-toolbar">
+          <div>
+            <p class="eyebrow">Workflow canvas</p>
+            <h2 id="workspace-title">Untitled knowledge base</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="connect-mode" class="button button-quiet" type="button">Connect mode</button>
+            <button id="auto-layout" class="button button-quiet" type="button">Auto layout</button>
+            <button id="delete-node" class="button button-danger-quiet" type="button">Delete selected</button>
+          </div>
+        </div>
+        <div id="canvas" class="canvas" aria-label="Workflow canvas">
+          <svg id="edge-layer" class="edge-layer" aria-hidden="true"></svg>
+          <div id="node-layer" class="node-layer"></div>
+          <div id="canvas-hint" class="canvas-hint">
+            <div class="hint-mark">+</div>
+            <strong>Start your knowledge pipeline</strong>
+            <span>Drag a source component here to begin</span>
+          </div>
+        </div>
+        <div class="canvas-footer">
+          <span><span class="legend-dot legend-source"></span>Source</span>
+          <span><span class="legend-dot legend-process"></span>Processing</span>
+          <span><span class="legend-dot legend-storage"></span>Storage</span>
+          <span><span class="legend-dot legend-ai"></span>AI</span>
+          <span class="canvas-tip">Click a node to edit its configuration</span>
+        </div>
+      </section>
+
+      <aside class="inspector-panel">
+        <section class="panel inspector-section">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">Knowledge base</p>
+              <h2>Metadata</h2>
+            </div>
+            <span id="metadata-state" class="state-pill state-draft">Draft</span>
+          </div>
+          <div class="form-grid">
+            <label class="field field-wide">
+              <span>Name</span>
+              <input id="kb-name" type="text" placeholder="Product Support Knowledge" value="Product Support Knowledge">
+            </label>
+            <label class="field field-wide">
+              <span>Description</span>
+              <textarea id="kb-description" rows="2" placeholder="What does this knowledge base contain?">Support policies, troubleshooting, and product guidance</textarea>
+            </label>
+            <label class="field">
+              <span>Owner</span>
+              <input id="metadata-owner" type="text" placeholder="Knowledge Team" value="Knowledge Team">
+            </label>
+            <label class="field">
+              <span>Version</span>
+              <input id="metadata-version" type="text" placeholder="1.0.0" value="1.0.0">
+            </label>
+            <label class="field">
+              <span>Visibility</span>
+              <select id="metadata-visibility">
+                <option value="private">Private</option>
+                <option value="team" selected>Team</option>
+                <option value="public">Public</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Language</span>
+              <input id="metadata-language" type="text" placeholder="en" value="en">
+            </label>
+            <label class="field field-wide">
+              <span>Tags <small>comma separated</small></span>
+              <input id="metadata-tags" type="text" placeholder="support, product" value="support, product, demo">
+            </label>
+          </div>
+        </section>
+
+        <section class="panel inspector-section">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">Selected component</p>
+              <h2>Configuration</h2>
+            </div>
+            <span id="selected-type" class="type-badge">None</span>
+          </div>
+          <div id="node-config-empty" class="empty-state">Select a node on the canvas to configure it.</div>
+          <div id="node-config-form" class="node-config-form" hidden>
+            <label class="field field-wide">
+              <span>Label</span>
+              <input id="node-label" type="text">
+            </label>
+            <label class="field field-wide">
+              <span>Configuration <small>JSON</small></span>
+              <textarea id="node-config" rows="7" spellcheck="false"></textarea>
+            </label>
+            <div class="config-error" id="config-error" hidden></div>
+          </div>
+        </section>
+
+        <section class="panel inspector-section">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">Documents</p>
+              <h2>Index &amp; retrieve</h2>
+            </div>
+            <button id="demo-docs" class="text-button" type="button">Load demo</button>
+          </div>
+          <textarea id="documents" class="document-editor" rows="9" spellcheck="false"></textarea>
+          <div class="action-row">
+            <button id="validate-workflow" class="button button-secondary" type="button">Validate</button>
+            <button id="run-pipeline" class="button button-primary" type="button">Run pipeline</button>
+          </div>
+          <div class="query-box">
+            <label for="search-query">Vector search / RAG query</label>
+            <div class="query-row">
+              <input id="search-query" type="text" placeholder="Ask a question..." value="How do I reset my password?">
+              <button id="search-button" class="icon-button" type="button" aria-label="Search">Search</button>
+            </div>
+            <label class="toggle-row"><input id="rag-mode" type="checkbox" checked><span>Return a RAG answer</span></label>
+          </div>
+        </section>
+
+        <section class="panel inspector-section output-section">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">Runtime</p>
+              <h2>Status &amp; results</h2>
+            </div>
+            <span id="run-state" class="state-pill state-idle">Idle</span>
+          </div>
+          <div id="status-summary" class="status-summary">
+            <div><span>Workflow</span><strong id="status-nodes">0 nodes</strong></div>
+            <div><span>Index</span><strong id="status-chunks">0 chunks</strong></div>
+            <div><span>Embedding</span><strong id="status-dimension">0 dim</strong></div>
+          </div>
+          <div id="validation-output" class="validation-output" hidden></div>
+          <div id="result-output" class="result-output">
+            <div class="result-placeholder">Run the pipeline, then search your indexed knowledge.</div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

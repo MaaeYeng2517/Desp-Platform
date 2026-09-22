@@ -191,7 +191,7 @@ export class KnowledgeBaseService {
     const entity = this.knowledgeBaseRepo.create({
       name: input.name.trim(),
       description: input.description?.trim() || '',
-      metadata: metadata as MetadataInput,
+      metadata: metadata as any,
       workflow: workflow as unknown as WorkflowDefinition,
       chunks: [],
       validation: validation as ValidationResult,
@@ -202,7 +202,8 @@ export class KnowledgeBaseService {
   }
 
   async findAll(): Promise<KnowledgeBaseEntity[]> {
-    return this.knowledgeBaseRepo.find({ order: { updatedAt: 'DESC' } });
+    const entities: KnowledgeBaseEntity[] = await this.knowledgeBaseRepo.find({ order: { updatedAt: 'DESC' } });
+    return entities;
   }
 
   async findOne(id: string): Promise<KnowledgeBaseEntity> {
@@ -216,7 +217,7 @@ export class KnowledgeBaseService {
   async update(id: string, input: Partial<KnowledgeBaseInput>): Promise<KnowledgeBaseEntity> {
     const entity = await this.findOne(id);
     const workflow = input.workflow ? this.normalizeWorkflow(input.workflow) : entity.workflow as unknown as WorkflowDefinition;
-    const metadata = input.metadata ? this.normalizeMetadata(input.metadata) : entity.metadata as MetadataInput;
+    const metadata = input.metadata ? this.normalizeMetadata(input.metadata) : entity.metadata as unknown as MetadataInput;
     const validation = this.validateWorkflowAndMetadata(workflow, metadata);
 
     Object.assign(entity, {
@@ -450,7 +451,7 @@ export class KnowledgeBaseService {
     };
   }
 
-  private validateWorkflowAndMetadata(workflow: WorkflowDefinition, metadata: Record<string, unknown>): ValidationResult {
+  private validateWorkflowAndMetadata(workflow: WorkflowDefinition, metadata: MetadataInput | Record<string, unknown>): ValidationResult {
     const issues: ValidationIssue[] = [];
     const ids = new Set<string>();
     const knownTypes = new Set<WorkflowNodeType>(Object.keys(nodeOrder) as WorkflowNodeType[]);

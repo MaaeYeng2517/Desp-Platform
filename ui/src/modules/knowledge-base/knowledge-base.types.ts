@@ -43,6 +43,7 @@ export interface MetadataInput {
   version?: string;
   visibility?: 'private' | 'team' | 'public';
   custom?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface DocumentInput {

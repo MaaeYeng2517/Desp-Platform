@@ -16,10 +16,10 @@ async function bootstrap() {
 
   const publicPath = join(__dirname, '..', 'public');
   app.useStaticAssets(publicPath);
-  app.get('/', (_req: Request, res: Response) => {
+  app.use('/', (_req: Request, res: Response) => {
     res.sendFile(join(publicPath, 'index.html'));
   });
-  app.get('/studio', (_req: Request, res: Response) => {
+  app.use('/studio', (_req: Request, res: Response) => {
     res.sendFile(join(publicPath, 'index.html'));
   });
 
