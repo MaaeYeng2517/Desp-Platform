@@ -1,0 +1,92 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Data files
+data/bronze/
+data/silver/
+data/gold/
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Airflow
+airflow.cfg
+airflow.db
+airflow-webserver.pid
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/profiles.yml
+
+# Docker
+docker-compose.override.yml
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+*.pem
+*.key
+*.crt
+secrets/
+*.env.local
+
+# MinIO
+minio-data/
+
+# Spark
+spark-events/
+spark-warehouse/
+
+# Monitoring
+prometheus-data/
+grafana-data/
+
+# CI/CD
+.github/workflows/*.yml.bak
+
+# Temporary files
+*.tmp
+*.temp
+tmp/

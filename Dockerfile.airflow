@@ -1,0 +1,40 @@
+# Copyright (c) 2026 Data Engineering Workflow Platform
+# Licensed under the MIT License
+
+# Custom Airflow Image with all dependencies
+FROM apache/airflow:3.3.2-python3.11
+
+USER root
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    postgresql-client \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install MinIO client (mc)
+RUN curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc \
+    -o /usr/local/bin/mc && \
+    chmod +x /usr/local/bin/mc
+
+USER airflow
+
+# Install Python dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Install additional Airflow providers
+RUN pip install --no-cache-dir \
+    apache-airflow-providers-postgres==5.9.0 \
+    apache-airflow-providers-apache-spark==4.0.0 \
+    apache-airflow-providers-minio==1.0.0 \
+    openlineage-airflow==1.8.0 \
+    dbt-postgres==1.8.0 \
+    dbt-expectations==0.10.0
+
+# Set working directory
+WORKDIR /opt/airflow
