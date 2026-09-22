@@ -1,51 +1,27 @@
-"""Pydantic schemas for API requests/responses"""
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Optional, List, Dict, Any
-from datetime import datetime
-from uuid import UUID
+"""Pydantic schemas for API requests and responses."""
 import enum
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from uuid import UUID
 
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-class UserRole(str, enum.Enum):
-    GUEST = "guest"
-    MEMBER = "member"
-    ADMIN = "admin"
-
-
-class SubscriptionStatus(str, enum.Enum):
-    ACTIVE = "active"
-    PAST_DUE = "past_due"
-    CANCELED = "canceled"
-    INCOMPLETE = "incomplete"
-    TRIALING = "trialing"
-    PAUSED = "paused"
-
-
-class ContactStatus(str, enum.Enum):
-    NEW = "new"
-    IN_PROGRESS = "in_progress"
-    RESOLVED = "resolved"
-    SPAM = "spam"
-
-
-class ApiKeyScope(str, enum.Enum):
-    READ = "read"
-    WRITE = "write"
-    ADMIN = "admin"
-    SEARCH = "search"
-    RAG = "rag"
-    DOCUMENTS = "documents"
-    WORKFLOWS = "workflows"
+from backend.app.models.api_key import ApiKeyScope
+from backend.app.models.billing import SubscriptionStatus
+from backend.app.models.contact import ContactStatus
+from backend.app.models.user import UserRole
 
 
 class TenantCreate(BaseModel):
-    name: str
-    slug: str
+    name: str = Field(min_length=1, max_length=255)
+    slug: str = Field(min_length=1, max_length=255)
     description: Optional[str] = None
-    settings: Dict[str, Any] = {}
+    settings: Dict[str, Any] = Field(default_factory=dict)
 
 
 class TenantResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     name: str
     slug: str
@@ -55,23 +31,32 @@ class TenantResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
-    full_name: Optional[str] = None
+    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
     tenant_id: Optional[UUID] = None
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: EmailStr) -> str:
+        return str(value).strip().lower()
 
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: EmailStr) -> str:
+        return str(value).strip().lower()
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     tenant_id: UUID
     email: str
@@ -80,13 +65,11 @@ class UserResponse(BaseModel):
     is_superuser: bool
     role: UserRole
     created_at: datetime
-
-    class Config:
-        from_attributes = True
+    updated_at: Optional[datetime] = None
 
 
 class UserUpdate(BaseModel):
-    full_name: Optional[str] = None
+    full_name: Optional[str] = Field(None, max_length=255)
     is_active: Optional[bool] = None
     role: Optional[UserRole] = None
 
@@ -94,26 +77,31 @@ class UserUpdate(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    csrf_token: str
     user: UserResponse
 
 
 class MembershipPlanCreate(BaseModel):
+    code: str = Field(min_length=1, max_length=50)
     stripe_price_id: Optional[str] = None
     stripe_product_id: Optional[str] = None
-    name: str
+    name: str = Field(min_length=1, max_length=255)
     description: Optional[str] = None
-    price_cents: int = 0
-    currency: str = "usd"
-    interval: str = "month"
-    api_calls_per_month: int = 1000
-    features: List[str] = []
+    price_cents: int = Field(0, ge=0)
+    currency: str = Field("thb", min_length=3, max_length=3)
+    interval: str = Field("month", pattern="^(month|year)$")
+    api_calls_per_month: int = Field(1000, ge=0)
+    features: List[str] = Field(default_factory=list)
     is_active: bool = True
-    sort_order: int = 0
+    sort_order: int = Field(0, ge=0)
 
 
 class MembershipPlanResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     tenant_id: UUID
+    code: str
     stripe_price_id: Optional[str]
     stripe_product_id: Optional[str]
     name: str
@@ -128,9 +116,6 @@ class MembershipPlanResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class SubscriptionCreate(BaseModel):
     plan_id: UUID
@@ -138,6 +123,8 @@ class SubscriptionCreate(BaseModel):
 
 
 class SubscriptionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     tenant_id: UUID
     user_id: UUID
@@ -156,9 +143,6 @@ class SubscriptionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class SubscriptionUpdate(BaseModel):
     cancel_at_period_end: Optional[bool] = None
@@ -171,8 +155,9 @@ class StripeCheckoutRequest(BaseModel):
 
 
 class StripeCheckoutResponse(BaseModel):
-    checkout_url: str
-    session_id: str
+    checkout_url: Optional[str] = None
+    session_id: Optional[str] = None
+    message: Optional[str] = None
 
 
 class StripePortalRequest(BaseModel):
@@ -183,13 +168,28 @@ class StripePortalResponse(BaseModel):
     portal_url: str
 
 
+class EntitlementResponse(BaseModel):
+    plan: str
+    status: str
+    api_calls_limit: int
+    features: List[str]
+    current_period_end: Optional[datetime] = None
+
+
 class ApiKeyCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
-    scopes: List[ApiKeyScope] = []
+    scopes: List[ApiKeyScope] = Field(default_factory=lambda: [ApiKeyScope.READ])
     expires_at: Optional[datetime] = None
+
+    @field_validator("scopes")
+    @classmethod
+    def unique_scopes(cls, value: List[ApiKeyScope]) -> List[ApiKeyScope]:
+        return list(dict.fromkeys(value))
 
 
 class ApiKeyResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     user_id: UUID
     tenant_id: UUID
@@ -202,9 +202,6 @@ class ApiKeyResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class ApiKeyCreateResponse(BaseModel):
     api_key: ApiKeyResponse
@@ -212,6 +209,8 @@ class ApiKeyCreateResponse(BaseModel):
 
 
 class ApiUsageLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     api_key_id: UUID
     user_id: UUID
@@ -227,9 +226,6 @@ class ApiUsageLogResponse(BaseModel):
     error_message: Optional[str]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class ContactMessageCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
@@ -239,6 +235,8 @@ class ContactMessageCreate(BaseModel):
 
 
 class ContactMessageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     user_id: Optional[UUID]
     tenant_id: Optional[UUID]
@@ -254,9 +252,6 @@ class ContactMessageResponse(BaseModel):
     user_agent: Optional[str]
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ContactMessageUpdate(BaseModel):
@@ -296,10 +291,12 @@ class KnowledgeBaseCreate(BaseModel):
     name: str
     description: Optional[str] = None
     slug: Optional[str] = None
-    settings: Dict[str, Any] = {}
+    settings: Dict[str, Any] = Field(default_factory=dict)
 
 
 class KnowledgeBaseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     tenant_id: UUID
     owner_id: UUID
@@ -313,19 +310,18 @@ class KnowledgeBaseResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class DocumentCreate(BaseModel):
     kb_id: UUID
     title: str
     source_type: str
     source_url: Optional[str] = None
-    metadata: Dict[str, Any] = {}
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class DocumentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     kb_id: UUID
     title: str
@@ -336,11 +332,10 @@ class DocumentResponse(BaseModel):
     is_published: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class ChunkResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     document_id: UUID
     content: str
@@ -348,15 +343,12 @@ class ChunkResponse(BaseModel):
     token_count: Optional[int]
     metadata: Dict[str, Any]
 
-    class Config:
-        from_attributes = True
-
 
 class SearchRequest(BaseModel):
     query: str
     kb_ids: List[UUID]
     metadata_filters: Optional[Dict[str, Any]] = None
-    limit: int = 10
+    limit: int = Field(10, ge=1, le=100)
     score_threshold: Optional[float] = None
     search_type: str = "hybrid"
 
@@ -368,7 +360,7 @@ class SearchResult(BaseModel):
     content: str
     score: float
     metadata: Dict[str, Any]
-    sources: List[str] = []
+    sources: List[str] = Field(default_factory=list)
 
 
 class SearchResponse(BaseModel):
@@ -382,9 +374,9 @@ class RAGRequest(BaseModel):
     query: str
     kb_ids: List[UUID]
     metadata_filters: Optional[Dict[str, Any]] = None
-    limit: int = 5
-    temperature: float = 0.7
-    max_tokens: int = 1000
+    limit: int = Field(5, ge=1, le=20)
+    temperature: float = Field(0.7, ge=0, le=2)
+    max_tokens: int = Field(1000, ge=1, le=10000)
 
 
 class RAGResponse(BaseModel):
@@ -399,11 +391,13 @@ class WorkflowCreate(BaseModel):
     kb_id: UUID
     name: str
     description: Optional[str] = None
-    nodes: List[Dict[str, Any]] = []
-    edges: List[Dict[str, Any]] = []
+    nodes: List[Dict[str, Any]] = Field(default_factory=list)
+    edges: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class WorkflowResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     kb_id: UUID
     name: str
@@ -413,19 +407,18 @@ class WorkflowResponse(BaseModel):
     is_active: bool
     version: str
 
-    class Config:
-        from_attributes = True
-
 
 class MetadataSchemaCreate(BaseModel):
     kb_id: UUID
     name: str
     description: Optional[str] = None
     fields: List[Dict[str, Any]]
-    taxonomy: Dict[str, Any] = {}
+    taxonomy: Dict[str, Any] = Field(default_factory=dict)
 
 
 class MetadataSchemaResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     kb_id: UUID
     name: str
@@ -433,9 +426,6 @@ class MetadataSchemaResponse(BaseModel):
     fields: List[Dict[str, Any]]
     taxonomy: Dict[str, Any]
     is_active: bool
-
-    class Config:
-        from_attributes = True
 
 
 class EvaluationRequest(BaseModel):
