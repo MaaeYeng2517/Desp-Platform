@@ -226,6 +226,7 @@ psycopg-binary==3.3.4
 psycopg2-binary==2.9.12
 ptyprocess==0.7.0
 pure_eval==0.2.3
+pyspark==4.0.0
 pyarrow==25.0.1
 pyasn1==0.6.4
 pycparser==3.0
