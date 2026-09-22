@@ -22,18 +22,13 @@ DEWP เป็นแพลตฟอร์ม Data Engineering แบบเปิ
 
 แนวคิดหลักของแพลตฟอร์ม:
 
-```text
-DATA
- ↓
-PIPELINE
- ↓
-QUALITY
- ↓
-WAREHOUSE
- ↓
-ANALYTICS
- ↓
-AI
+```mermaid
+graph TD;
+    DATA -> PIPELINE;
+    PIPELINE -> QUALITY;
+    QUALITY -> WAREHOUSE;
+    WAREHOUSE -> ANALYTICS;
+    ANALYTICS -> AI;
 ```
 
 แพลตฟอร์มรองรับขั้นตอนการทำงานแบบต่อเนื่อง:
@@ -355,6 +350,22 @@ docker compose ps
 ```bash
 docker compose down
 ```
+
+### 10.3 Knowledge Platform SaaS
+
+Knowledge Platform ถูกย้ายมารวมกับโปรเจกต์หลักแล้ว ใช้ source ที่ root:
+
+```bash
+# Backend
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+เปิดใช้งานหน้าเว็บที่ `http://localhost:3000` และ API documentation ที่ `http://localhost:8000/docs` ระบบรองรับ registration, member/admin RBAC, Stripe Checkout/Portal, API key generation และ API key authentication.
 
 ---
 

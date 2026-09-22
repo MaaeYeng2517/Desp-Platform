@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>README.md</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+html,footer,header{
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Custom MD PDF CSS
+ */
+html,footer,header{
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+
+ }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+<link rel="stylesheet" href="file:///Users/maaeyeng/data-engineering-platform/R%3A%5C2.Travail%5C1.Enseignement%5CCours%5C_1.Outils%5C2.Developpement%5C1.SCSS%5Cmain.css" type="text/css"><link rel="stylesheet" href="file:///Users/maaeyeng/data-engineering-platform/D%3A%5Crdaros%5CCours%5C_1.Outils%5C2.Developpement%5C1.SCSS%5Cmain.css" type="text/css">
+</head>
+
+<body>
+    <h1 id="data-engineering-workflow-platform">Data Engineering Workflow Platform</h1>
+<p><img src="https://github.com/MaaeYeng2517/Desp-Platform/blob/main/desp-km.png" alt="logo"></p>
+<blockquote>
+<p>Open Source Data Engineering Platform สำหรับสร้างและจัดการ Data Pipeline ตั้งแต่ Data Source → Data Lake → Transformation → Data Quality → Data Warehouse → Analytics → AI</p>
+</blockquote>
+<hr>
+<h2 id="1-project-name">1. Project Name</h2>
+<p><strong>Data Engineering Workflow Platform (DEWP)</strong></p>
+<hr>
+<h2 id="2-project-description">2. Project Description</h2>
+<p>DEWP เป็นแพลตฟอร์ม Data Engineering แบบเปิดซอร์สที่ช่วยให้ผู้ใช้สร้างและจัดการ Data Pipeline แบบครบวงจร ตั้งแต่การรับข้อมูล (Ingest) ไปยังการส่งข้อมูลให้กับ BI, ML และ AI โดยใช้ Medallion Architecture (Bronze → Silver → Gold) ร่วมกับ Apache Airflow เป็น Workflow Orchestrator</p>
+<hr>
+<h2 id="3-overview">3. Overview</h2>
+<p>แนวคิดหลักของแพลตฟอร์ม:</p>
+<pre class="hljs"><code><div>graph TD;
+    DATA -&gt; PIPELINE;
+    PIPELINE -&gt; QUALITY;
+    QUALITY -&gt; WAREHOUSE;
+    WAREHOUSE -&gt; ANALYTICS;
+    ANALYTICS -&gt; AI;
+</div></code></pre>
+<p>แพลตฟอร์มรองรับขั้นตอนการทำงานแบบต่อเนื่อง:</p>
+<ul>
+<li><strong>Ingest</strong> — รับข้อมูลจากแหล่งข้อมูลหลากประเภท (CSV, Database, API, Event Streams)</li>
+<li><strong>Transform</strong> — ทำความสะอาดและแปลงข้อมูลด้วย Python / SQL / dbt</li>
+<li><strong>Validate</strong> — ตรวจสอบคุณภาพข้อมูลตาม Quality Rules</li>
+<li><strong>Orchestrate</strong> — จัดการ Pipeline ด้วย Apache Airflow</li>
+<li><strong>Store</strong> — เก็บข้อมูลใน Data Lake (MinIO) และ Data Warehouse (PostgreSQL)</li>
+<li><strong>Monitor</strong> — ติดตามสถานะ Pipeline, Metrics และ Alerts ด้วย Prometheus + Grafana</li>
+<li><strong>Track</strong> — ติดตาม Data Lineage ด้วย OpenLineage และ Apache Atlas</li>
+<li><strong>Serve</strong> — ส่งข้อมูลต่อให้ BI, ML, AI และ Knowledge Platform</li>
+</ul>
+<hr>
+<h2 id="4-features">4. Features</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Medallion Architecture</td>
+<td>แบ่งข้อมูลเป็น 3 ชั้น: Bronze (Raw), Silver (Cleaned), Gold (Business Ready)</td>
+</tr>
+<tr>
+<td>Data Lake</td>
+<td>ใช้ MinIO เป็น Object Storage สำหรับเก็บข้อมูล Bronze/Silver/Gold</td>
+</tr>
+<tr>
+<td>Data Warehouse</td>
+<td>ใช้ PostgreSQL พร้อม schema <code>raw</code>, <code>staging</code>, <code>mart</code></td>
+</tr>
+<tr>
+<td>ETL Pipeline</td>
+<td>Python scripts สำหรับ Extraction, Validation, Transformation, Loading</td>
+</tr>
+<tr>
+<td>dbt Integration</td>
+<td>SQL Transformation แบบ Staging → Intermediate → Mart</td>
+</tr>
+<tr>
+<td>Workflow Orchestration</td>
+<td>Apache Airflow (CeleryExecutor) สำหรับการกำหนด Schedule และ Task Dependencies</td>
+</tr>
+<tr>
+<td>Data Quality</td>
+<td>Automated quality checks (duplicates, nulls, ranges, business rules)</td>
+</tr>
+<tr>
+<td>Distributed Processing</td>
+<td>Apache Spark (master + worker) สำหรับข้อมูลขนาดใหญ่</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>Prometheus (metrics) + Grafana (dashboards)</td>
+</tr>
+<tr>
+<td>Data Lineage</td>
+<td>OpenLineage integration ผ่าน Airflow plugin และ Apache Atlas metadata catalog</td>
+</tr>
+<tr>
+<td>AI / RAG</td>
+<td>Knowledge Platform สำหรับ AI Agent และ Vector Search</td>
+</tr>
+<tr>
+<td>Embedded Analytics</td>
+<td>REST API + JavaScript SDK สำหรับ embed dashboards/charts ในแอปภายนอก</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="5-system-requirements">5. System Requirements</h2>
+<h3 id="%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%8B%E0%B8%AD%E0%B8%9F%E0%B8%95%E0%B9%8C%E0%B9%81%E0%B8%A7%E0%B8%A3%E0%B9%8C">ความต้องการซอฟต์แวร์</h3>
+<ul>
+<li><strong>Git</strong> — version control</li>
+<li><strong>Python</strong> — 3.13+</li>
+<li><strong>Docker</strong> — container runtime</li>
+<li><strong>Docker Compose</strong> — multi-container orchestration</li>
+</ul>
+<h3 id="%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AE%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%81%E0%B8%A7%E0%B8%A3%E0%B9%8C-%E0%B9%81%E0%B8%99%E0%B8%B0%E0%B8%99%E0%B8%B3">ความต้องการฮาร์ดแวร์ (แนะนำ)</h3>
+<ul>
+<li>RAM อย่างน้อย 8 GB (ขอแนะนำ 16 GB)</li>
+<li>CPU อย่างน้อย 4 cores</li>
+<li>ดิสก์อย่างน้อย 20 GB ว่าง</li>
+</ul>
+<hr>
+<h2 id="6-technology-stack">6. Technology Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Python 3.13</td>
+</tr>
+<tr>
+<td>Query</td>
+<td>SQL</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>Docker</td>
+</tr>
+<tr>
+<td>Orchestration</td>
+<td>Apache Airflow 3.3 (CeleryExecutor)</td>
+</tr>
+<tr>
+<td>Transformation</td>
+<td>dbt</td>
+</tr>
+<tr>
+<td>Data Lake</td>
+<td>MinIO</td>
+</tr>
+<tr>
+<td>Warehouse</td>
+<td>PostgreSQL 16</td>
+</tr>
+<tr>
+<td>Processing</td>
+<td>Pandas / Polars</td>
+</tr>
+<tr>
+<td>Distributed Processing</td>
+<td>Apache Spark 3.5</td>
+</tr>
+<tr>
+<td>Quality</td>
+<td>Python SQL checks</td>
+</tr>
+<tr>
+<td>Lineage</td>
+<td>OpenLineage</td>
+</tr>
+<tr>
+<td>Catalog</td>
+<td>Apache Atlas</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>Prometheus / Grafana</td>
+</tr>
+<tr>
+<td>Embedded Analytics</td>
+<td>FastAPI / Chart.js / JavaScript SDK</td>
+</tr>
+<tr>
+<td>Version Control</td>
+<td>Git</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-architecture">7. Architecture</h2>
+<pre class="hljs"><code><div>Data Sources
+      ↓
+   Ingestion
+      ↓
+   Data Lake
+      ↓
+    Bronze
+      ↓
+Transformation
+      ↓
+    Silver
+      ↓
+ Data Quality
+      ↓
+     Gold
+      ↓
+Data Warehouse
+      ↓
+BI / Analytics / ML / AI
+</div></code></pre>
+<pre class="hljs"><code><div>flowchart TB
+
+    SOURCES[&quot;DATA SOURCES&quot;]
+    INGEST[&quot;INGESTION&quot;]
+    LAKE[&quot;DATA LAKE MinIO&quot;]
+    BRONZE[&quot;BRONZE Raw&quot;]
+    TRANSFORM[&quot;TRANSFORMATION Python / SQL / dbt / Spark&quot;]
+    SILVER[&quot;SILVER Cleaned&quot;]
+    QUALITY[&quot;DATA QUALITY&quot;]
+    GOLD[&quot;GOLD Business Ready&quot;]
+    WAREHOUSE[&quot;DATA WAREHOUSE PostgreSQL&quot;]
+    CONSUMPTION[&quot;BI / Analytics / ML / AI&quot;]
+    EMBEDDED[&quot;EMBEDDED ANALYTICS&quot;]
+
+    SOURCES --&gt; INGEST
+    INGEST --&gt; LAKE
+    LAKE --&gt; BRONZE
+    BRONZE --&gt; TRANSFORM
+    TRANSFORM --&gt; SILVER
+    SILVER --&gt; QUALITY
+    QUALITY --&gt; GOLD
+    GOLD --&gt; WAREHOUSE
+    WAREHOUSE --&gt; CONSUMPTION
+    WAREHOUSE --&gt; EMBEDDED
+</div></code></pre>
+<hr>
+<h2 id="8-project-structure">8. Project Structure</h2>
+<pre class="hljs"><code><div>data-engineering-platform/
+│
+├── dags/
+│   ├── data_platform_pipeline.py
+│   ├── hello_pipeline.py
+│   └── sales_etl.py
+│
+├── ingestion/
+│   ├── sales_pipeline.py
+│   ├── sales_pipeline_minio.py
+│   └── minio_client.py
+│
+├── transformation/
+│   ├── sales_silver.py
+│   └── sales_silver_minio.py
+│
+├── quality/
+│   ├── sales_quality.py
+│   └── gold_quality.py
+│
+├── warehouse/
+│
+├── sql/
+│   ├── init_schema.sql
+│   ├── staging/
+│   │   └── sales.sql
+│   ├── marts/
+│   │   └── sales.sql
+│   └── gold_sales.sql
+│
+├── dbt/
+│   └── dbt_project.yml
+│
+├── analytics/
+│   └── dbt_project.yml
+│
+├── data/
+│   ├── raw/
+│   │   └── sales.csv
+│   ├── bronze/
+│   │   └── sales/
+│   ├── silver/
+│   │   └── sales/
+│   └── gold/
+│
+├── monitoring/
+│   ├── prometheus.yml
+│   └── grafana/
+│       ├── dashboards/
+│       └── datasources/
+│
+├── ui/
+│   └── src/
+│       └── entities/
+│
+├── backend/
+│   ├── app/                # FastAPI API, SaaS, auth, billing
+│   ├── config.py
+│   └── database.py
+├── frontend/               # Next.js SaaS web application
+├── workers/                # Knowledge Platform background worker
+├── docker/                 # Knowledge Platform container images and SQL
+├── scripts/                # Setup and operational scripts
+│
+├── embedded/
+│   ├── main.py
+│   ├── config.py
+│   ├── database.py
+│   ├── models.py
+│   ├── seed.py
+│   ├── requirements.txt
+│   └── sdk/
+│       ├── embedded-analytics.js
+│       ├── embedded-analytics.d.ts
+│       ├── package.json
+│       └── demo.html
+│
+├── mobile/
+│
+├── tests/
+├── notebooks/
+├── scripts/
+├── docs/
+│
+├── config/
+├── logs/
+│
+├── docker/
+├── .github/
+│   └── workflows/
+│
+├── docker-compose.yaml
+├── docker-compose.yml
+├── requirements.txt
+├── .env
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── README.md
+├── README.pdf
+└── despk-m.png
+</div></code></pre>
+<hr>
+<h2 id="9-installation">9. Installation</h2>
+<h3 id="91-clone-repository">9.1 Clone Repository</h3>
+<pre class="hljs"><code><div>git <span class="hljs-built_in">clone</span> https://github.com/MaaeYeng2517/data-engineering-platform.git
+<span class="hljs-built_in">cd</span> data-engineering-platform
+</div></code></pre>
+<h3 id="92-%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%90%E0%B8%B2%E0%B8%99">9.2 ติดตั้งเครื่องมือพื้นฐาน</h3>
+<pre class="hljs"><code><div>brew install git python uv
+brew install --cask docker
+</div></code></pre>
+<p>ตรวจสอบเวอร์ชัน:</p>
+<pre class="hljs"><code><div>git --version
+python3 --version
+uv --version
+docker --version
+docker compose version
+</div></code></pre>
+<h3 id="93-%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87-python-environment">9.3 สร้าง Python Environment</h3>
+<pre class="hljs"><code><div>uv venv --python 3.13
+<span class="hljs-built_in">source</span> .venv/bin/activate
+</div></code></pre>
+<h3 id="94-%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87-python-packages">9.4 ติดตั้ง Python Packages</h3>
+<pre class="hljs"><code><div>uv pip install -r requirements.txt
+</div></code></pre>
+<hr>
+<h2 id="10-configuration">10. Configuration</h2>
+<h3 id="101-environment-file">10.1 Environment File</h3>
+<p>สร้างไฟล์ <code>.env</code> จากตัวอย่าง:</p>
+<pre class="hljs"><code><div>cp .env.example .env
+</div></code></pre>
+<p>แก้ไขค่าใน <code>.env</code>:</p>
+<pre class="hljs"><code><div>AIRFLOW_UID=501
+SPARK_MASTER=spark://spark-master:7077
+SPARK_EXECUTOR_MEMORY=2g
+SPARK_EXECUTOR_CORES=2
+SPARK_NUM_EXECUTORS=2
+SPARK_DRIVER_MEMORY=1g
+FERNET_KEY=your-fernet-key-here
+AIRFLOW__API_AUTH__JWT_SECRET=airflow_jwt_secret
+</div></code></pre>
+<h3 id="102-docker-compose">10.2 Docker Compose</h3>
+<p>เริ่มต้นโครงสร้างระบบ:</p>
+<pre class="hljs"><code><div>docker compose up -d
+
+<span class="hljs-comment"># เปิด Apache Atlas และ seed metadata ตัวอย่าง</span>
+docker compose --profile atlas up -d atlas atlas-init
+</div></code></pre>
+<p>ตรวจสอบสถานะคอนเทนเจอร์:</p>
+<pre class="hljs"><code><div>docker compose ps
+</div></code></pre>
+<p>หยุดระบบ:</p>
+<pre class="hljs"><code><div>docker compose down
+</div></code></pre>
+<h3 id="103-knowledge-platform-saas">10.3 Knowledge Platform SaaS</h3>
+<p>Knowledge Platform ถูกย้ายมารวมกับโปรเจกต์หลักแล้ว ใช้ source ที่ root:</p>
+<pre class="hljs"><code><div><span class="hljs-comment"># Backend</span>
+uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+<span class="hljs-comment"># Frontend</span>
+<span class="hljs-built_in">cd</span> frontend
+npm install
+npm run dev
+</div></code></pre>
+<p>เปิดใช้งานหน้าเว็บที่ <code>http://localhost:3000</code> และ API documentation ที่ <code>http://localhost:8000/docs</code> ระบบรองรับ registration, member/admin RBAC, Stripe Checkout/Portal, API key generation และ API key authentication.</p>
+<hr>
+<h2 id="11-environment-variables">11. Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AIRFLOW_UID</code></td>
+<td><code>50000</code></td>
+<td>User ID ใน Airflow containers</td>
+</tr>
+<tr>
+<td><code>AIRFLOW_IMAGE_NAME</code></td>
+<td><code>apache/airflow:3.3.2</code></td>
+<td>Docker image ของ Airflow</td>
+</tr>
+<tr>
+<td><code>AIRFLOW_PROJ_DIR</code></td>
+<td><code>.</code></td>
+<td>Base path สำหรับ volume mounts</td>
+</tr>
+<tr>
+<td><code>FERNET_KEY</code></td>
+<td>-</td>
+<td>กุญแจเข้ารหัสสำหรบ Airflow</td>
+</tr>
+<tr>
+<td><code>MINIO_ENDPOINT</code></td>
+<td><code>localhost:9000</code></td>
+<td>MinIO endpoint</td>
+</tr>
+<tr>
+<td><code>MINIO_ACCESS_KEY</code></td>
+<td><code>minioadmin</code></td>
+<td>MinIO access key</td>
+</tr>
+<tr>
+<td><code>MINIO_SECRET_KEY</code></td>
+<td><code>minioadmin</code></td>
+<td>MinIO secret key</td>
+</tr>
+<tr>
+<td><code>MINIO_SECURE</code></td>
+<td><code>false</code></td>
+<td>ใช้ HTTPS หรือไม่</td>
+</tr>
+<tr>
+<td><code>ATLAS_ENDPOINT</code></td>
+<td><code>http://localhost:21000</code></td>
+<td>Apache Atlas API endpoint</td>
+</tr>
+<tr>
+<td><code>ATLAS_USERNAME</code></td>
+<td><code>admin</code></td>
+<td>Apache Atlas UI/API username</td>
+</tr>
+<tr>
+<td><code>ATLAS_PASSWORD</code></td>
+<td><code>admin</code></td>
+<td>Apache Atlas UI/API password</td>
+</tr>
+<tr>
+<td><code>DB_HOST</code></td>
+<td><code>postgres</code></td>
+<td>PostgreSQL host</td>
+</tr>
+<tr>
+<td><code>PGPASSWORD</code></td>
+<td><code>dataeng</code></td>
+<td>PostgreSQL password</td>
+</tr>
+<tr>
+<td><code>SPARK_MASTER</code></td>
+<td><code>spark://spark-master:7077</code></td>
+<td>Spark master URL</td>
+</tr>
+<tr>
+<td><code>EMBED_TOKEN_SECRET</code></td>
+<td><code>change-me-in-production</code></td>
+<td>Secret key สำหรับ embed token signing</td>
+</tr>
+<tr>
+<td><code>EMBED_BASE_URL</code></td>
+<td><code>http://localhost:8080</code></td>
+<td>Base URL สำหรับ embed URLs</td>
+</tr>
+<tr>
+<td><code>ALLOWED_ORIGINS</code></td>
+<td><code>[&quot;*&quot;]</code></td>
+<td>Allowed CORS origins สำหรับ embedded analytics</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="12-usage">12. Usage</h2>
+<h3 id="121-%E0%B9%80%E0%B8%A3%E0%B8%B4%E0%B9%88%E0%B8%A1%E0%B8%95%E0%B9%89%E0%B8%99-infrastructure">12.1 เริ่มต้น Infrastructure</h3>
+<pre class="hljs"><code><div>docker compose up -d
+</div></code></pre>
+<h3 id="122-%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87-sample-data">12.2 สร้าง Sample Data</h3>
+<p>สร้างไฟล์ <code>data/raw/sales.csv</code>:</p>
+<pre class="hljs"><code><div>transaction_id,transaction_date,customer_id,product_id,quantity,unit_price
+TX001,2026-09-01,C001,P001,2,100.00
+TX002,2026-09-01,C002,P002,1,250.00
+TX003,2026-09-02,C001,P003,3,150.00
+TX004,2026-09-02,C003,P001,5,100.00
+TX005,2026-09-03,C004,P002,2,250.00
+TX006,2026-09-03,C002,P003,1,150.00
+</div></code></pre>
+<h3 id="123-%E0%B8%A3%E0%B8%B1%E0%B8%99-transformation">12.3 รัน Transformation</h3>
+<pre class="hljs"><code><div>python transformation/sales_silver.py
+</div></code></pre>
+<p>ผลลัพธ์:</p>
+<pre class="hljs"><code><div>data/
+│
+├── bronze/
+│   └── sales/sales.csv
+│
+├── silver/
+│   └── sales/sales_clean.csv
+│
+└── gold/
+    └── sales_daily.csv
+</div></code></pre>
+<h3 id="124-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%9C%E0%B8%A5%E0%B8%A5%E0%B8%B1%E0%B8%9E%E0%B8%98%E0%B9%8C">12.4 ตรวจสอบผลลัพธ์</h3>
+<pre class="hljs"><code><div>cat data/silver/sales/sales_clean.csv
+cat data/gold/sales_daily.csv
+</div></code></pre>
+<p>ผลลัพธ์ Gold:</p>
+<pre class="hljs"><code><div>transaction_date,transaction_count,units_sold,revenue
+2026-09-01,2,3,450
+2026-09-02,2,8,750
+2026-09-03,2,3,650
+</div></code></pre>
+<h3 id="125-%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2-postgresql">12.5 เข้า PostgreSQL</h3>
+<pre class="hljs"><code><div>docker <span class="hljs-built_in">exec</span> -it de-postgres \
+psql -U dataeng -d datawarehouse
+</div></code></pre>
+<p>ตรวจสอบ Schema และ Tables:</p>
+<pre class="hljs"><code><div>\dn
+\dt raw.*
+\dt staging.*
+\dt mart.*
+</div></code></pre>
+<hr>
+<h2 id="13-api-documentation">13. API Documentation</h2>
+<h3 id="131-airflow-api">13.1 Airflow API</h3>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:8080</code></li>
+<li><strong>Username:</strong> <code>airflow</code></li>
+<li><strong>Password:</strong> <code>airflow</code></li>
+</ul>
+<h3 id="132-minio-api">13.2 MinIO API</h3>
+<ul>
+<li><strong>Console URL:</strong> <code>http://localhost:9001</code></li>
+<li><strong>API URL:</strong> <code>http://localhost:9000</code></li>
+<li><strong>Access Key:</strong> <code>minioadmin</code></li>
+<li><strong>Secret Key:</strong> <code>minioadmin</code></li>
+</ul>
+<h3 id="133-postgresql">13.3 PostgreSQL</h3>
+<ul>
+<li><strong>Host:</strong> <code>localhost:5432</code></li>
+<li><strong>Database:</strong> <code>datawarehouse</code></li>
+<li><strong>User:</strong> <code>dataeng</code></li>
+<li><strong>Password:</strong> <code>dataeng</code></li>
+</ul>
+<h3 id="134-grafana">13.4 Grafana</h3>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:3000</code></li>
+<li><strong>Username:</strong> <code>admin</code></li>
+<li><strong>Password:</strong> <code>admin</code></li>
+</ul>
+<h3 id="135-apache-atlas">13.5 Apache Atlas</h3>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:21000</code></li>
+<li><strong>Username:</strong> <code>admin</code></li>
+<li><strong>Password:</strong> <code>admin</code></li>
+<li><strong>Seed entities:</strong> <code>atlas-init</code> creates the <code>raw</code>, <code>raw.sales</code>, and sales column metadata after Atlas is healthy</li>
+</ul>
+<h3 id="136-prometheus">13.6 Prometheus</h3>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:9090</code></li>
+</ul>
+<hr>
+<h2 id="137-embedded-analytics-api">13.7 Embedded Analytics API</h2>
+<ul>
+<li><strong>URL:</strong> <code>http://localhost:8080</code></li>
+<li><strong>API Docs:</strong> <code>http://localhost:8080/docs</code></li>
+</ul>
+<hr>
+<h2 id="138-embedded-analytics-usage">13.8 Embedded Analytics Usage</h2>
+<h3 id="1381-%E0%B9%80%E0%B8%A3%E0%B8%B4%E0%B9%88%E0%B8%A1%E0%B8%95%E0%B9%89%E0%B8%99-embedded-analytics-service">13.8.1 เริ่มต้น Embedded Analytics Service</h3>
+<pre class="hljs"><code><div>docker compose up -d embedded
+</div></code></pre>
+<h3 id="1382-%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87-sample-dashboards-%E0%B9%81%E0%B8%A5%E0%B8%B0-charts">13.8.2 สร้าง Sample Dashboards และ Charts</h3>
+<pre class="hljs"><code><div>python embedded/seed.py
+</div></code></pre>
+<h3 id="1383-%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-javascript-sdk">13.8.3 ใช้งานผ่าน JavaScript SDK</h3>
+<p>ติดตั้ง SDK:</p>
+<pre class="hljs"><code><div>npm install @dewp/embedded-sdk
+</div></code></pre>
+<p>หรือใช้ผ่าน CDN:</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.jsdelivr.net/gh/MaaeYeng2517/data-engineering-platform@main/embedded/sdk/embedded-analytics.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</div></code></pre>
+<p>ตัวอย่างการใช้งาน:</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Initialize SDK</span>
+<span class="hljs-keyword">const</span> analytics = <span class="hljs-keyword">new</span> DEWPEmbeddedAnalytics({
+  <span class="hljs-attr">apiBase</span>: <span class="hljs-string">'http://localhost:8080'</span>
+});
+
+<span class="hljs-comment">// สร้าง embed token สำหรับ dashboard</span>
+<span class="hljs-keyword">const</span> token = <span class="hljs-keyword">await</span> analytics.createToken({ 
+  <span class="hljs-attr">dashboardId</span>: <span class="hljs-string">'sales-overview'</span>,
+  <span class="hljs-attr">expiresIn</span>: <span class="hljs-number">3600</span>  <span class="hljs-comment">// 1 ชั่วโมง</span>
+});
+
+<span class="hljs-comment">// Embed dashboard ใน container</span>
+analytics.embedDashboard({
+  <span class="hljs-attr">container</span>: <span class="hljs-string">'dashboard-container'</span>,
+  <span class="hljs-attr">embedUrl</span>: token.embedUrl,
+  <span class="hljs-attr">onLoad</span>: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Dashboard loaded!'</span>),
+  <span class="hljs-attr">onError</span>: <span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Failed to load:'</span>, err)
+});
+
+<span class="hljs-comment">// Embed chart เดี่ยว</span>
+<span class="hljs-keyword">const</span> chartToken = <span class="hljs-keyword">await</span> analytics.createToken({ 
+  <span class="hljs-attr">chartId</span>: <span class="hljs-string">'daily-revenue'</span> 
+});
+
+analytics.embedChart({
+  <span class="hljs-attr">container</span>: <span class="hljs-string">'chart-container'</span>,
+  <span class="hljs-attr">embedUrl</span>: chartToken.embedUrl,
+});
+</div></code></pre>
+<h3 id="1374-embed-%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-iframe-%E0%B9%82%E0%B8%94%E0%B8%A2%E0%B8%95%E0%B8%A3%E0%B8%87">13.7.4 Embed ผ่าน iframe โดยตรง</h3>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> 
+  <span class="hljs-attr">src</span>=<span class="hljs-string">"http://localhost:8080/embed/dashboard/sales-overview?token=YOUR_EMBED_TOKEN"</span>
+  <span class="hljs-attr">width</span>=<span class="hljs-string">"100%"</span> 
+  <span class="hljs-attr">height</span>=<span class="hljs-string">"600px"</span>
+  <span class="hljs-attr">frameborder</span>=<span class="hljs-string">"0"</span>
+  <span class="hljs-attr">allowfullscreen</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">iframe</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> 
+  <span class="hljs-attr">src</span>=<span class="hljs-string">"http://localhost:8080/embed/chart/daily-revenue?token=YOUR_EMBED_TOKEN"</span>
+  <span class="hljs-attr">width</span>=<span class="hljs-string">"100%"</span> 
+  <span class="hljs-attr">height</span>=<span class="hljs-string">"400px"</span>
+  <span class="hljs-attr">frameborder</span>=<span class="hljs-string">"0"</span>
+  <span class="hljs-attr">allowfullscreen</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">iframe</span>&gt;</span>
+</div></code></pre>
+<h3 id="1375-api-endpoints">13.7.5 API Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/embed/tokens</code></td>
+<td>สร้าง embed token</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/embed/dashboards</code></td>
+<td>รายการ dashboards ทั้งหมด</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/embed/dashboards/{id}</code></td>
+<td>รายละเอียด dashboard</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/embed/charts</code></td>
+<td>รายการ charts ทั้งหมด</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/embed/charts/{id}</code></td>
+<td>รายละเอียด chart</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/embed/charts/{id}/data</code></td>
+<td>ข้อมูล chart (ต้องใช้ token)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/embed/dashboard/{id}</code></td>
+<td>Embed dashboard HTML page</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/embed/chart/{id}</code></td>
+<td>Embed chart HTML page</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1376-security-features">13.7.6 Security Features</h3>
+<ul>
+<li><strong>Token-based Authentication</strong>: ทุก embed request ต้องใช้ token</li>
+<li><strong>Token Expiry</strong>: Token มีอายุการใช้งาน (default 1 ชั่วโมง)</li>
+<li><strong>Domain Restriction</strong>: จำกัด domain ที่สามารถ embed ได้</li>
+<li><strong>CORS Support</strong>: รองรับ CORS สำหรับ cross-origin embedding</li>
+</ul>
+<hr>
+<h2 id="14-database">14. Database</h2>
+<h3 id="141-postgresql--data-warehouse">14.1 PostgreSQL — Data Warehouse</h3>
+<table>
+<thead>
+<tr>
+<th>Database</th>
+<th>User</th>
+<th>Password</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>airflow</code></td>
+<td><code>airflow</code></td>
+<td><code>airflow</code></td>
+<td>Airflow metadata</td>
+</tr>
+<tr>
+<td><code>datawarehouse</code></td>
+<td><code>dataeng</code></td>
+<td><code>dataeng</code></td>
+<td>Data warehouse</td>
+</tr>
+</tbody>
+</table>
+<h3 id="142-schemas">14.2 Schemas</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> <span class="hljs-keyword">raw</span>;
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> staging;
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">SCHEMA</span> <span class="hljs-keyword">IF</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> mart;
+</div></code></pre>
+<h3 id="143-minio--data-lake">14.3 MinIO — Data Lake</h3>
+<table>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bronze</code></td>
+<td>Raw data (immutable copy from source)</td>
+</tr>
+<tr>
+<td><code>silver</code></td>
+<td>Cleaned, validated, deduplicated data</td>
+</tr>
+<tr>
+<td><code>gold</code></td>
+<td>Business-ready aggregated data</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="15-data-model">15. Data Model</h2>
+<h3 id="151-sales-data-warehouse-entity-relationship">15.1 Sales Data Warehouse Entity-Relationship</h3>
+<pre class="hljs"><code><div>erDiagram
+
+    CUSTOMER {
+        string customer_id PK
+        string customer_name
+        string segment
+    }
+
+    PRODUCT {
+        string product_id PK
+        string product_name
+        string category
+        decimal price
+    }
+
+    DATE {
+        int date_key PK
+        date date
+        int year
+        int month
+        int day
+    }
+
+    SALES {
+        string transaction_id PK
+        string customer_id FK
+        string product_id FK
+        int date_key FK
+        int quantity
+        decimal unit_price
+        decimal total_amount
+    }
+
+    CUSTOMER ||--o{ SALES : buys
+    PRODUCT ||--o{ SALES : contains
+    DATE ||--o{ SALES : occurs
+</div></code></pre>
+<h3 id="152-bronze--silver--gold-layers">15.2 Bronze / Silver / Gold Layers</h3>
+<pre class="hljs"><code><div>flowchart LR
+
+    SOURCE[&quot;SOURCE&quot;]
+    BRONZE[&quot;BRONZE Raw Data&quot;]
+    SILVER[&quot;SILVER Cleaned Validated&quot;]
+    GOLD[&quot;GOLD Business Ready&quot;]
+
+    SOURCE --&gt; BRONZE
+    BRONZE --&gt; SILVER
+    SILVER --&gt; GOLD
+</div></code></pre>
+<p><strong>Bronze</strong> — Raw: Original, Immutable, Traceable<br>
+<strong>Silver</strong> — Cleaned: Standardization, Deduplication, Validation<br>
+<strong>Gold</strong> — Business Ready: Analytics, Reporting, BI, ML, AI</p>
+<hr>
+<h2 id="16-testing">16. Testing</h2>
+<h3 id="161-%E0%B8%A3%E0%B8%B1%E0%B8%99-tests">16.1 รัน Tests</h3>
+<pre class="hljs"><code><div>pytest tests/ -v
+</div></code></pre>
+<h3 id="162-test-coverage">16.2 Test Coverage</h3>
+<pre class="hljs"><code><div>pytest tests/ --cov=src/ --cov-report=html
+</div></code></pre>
+<h3 id="163-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A0%E0%B8%97-tests">16.3 ประเภท Tests</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit Tests</td>
+<td>ทดสอบฟังก์ชันแยกจากกัน</td>
+</tr>
+<tr>
+<td>Integration Tests</td>
+<td>ทดสอบการทำงานระหว่าี้ของ Pipeline</td>
+</tr>
+<tr>
+<td>Data Quality Tests</td>
+<td>ทดสอบ Quality Rules บนข้อมูล</td>
+</tr>
+<tr>
+<td>dbt Tests</td>
+<td>ทดสอบโมเดล dbt (schema tests, data tests)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="17-code-quality">17. Code Quality</h2>
+<h3 id="171-linting-ruff">17.1 Linting (Ruff)</h3>
+<pre class="hljs"><code><div>ruff check .
+</div></code></pre>
+<h3 id="172-%E0%B9%81%E0%B8%81%E0%B9%89%E0%B9%84%E0%B8%82-lint-issues">17.2 แก้ไข Lint Issues</h3>
+<pre class="hljs"><code><div>ruff check . --fix
+</div></code></pre>
+<h3 id="173-formatting">17.3 Formatting</h3>
+<pre class="hljs"><code><div>ruff format .
+</div></code></pre>
+<hr>
+<h2 id="18-security">18. Security</h2>
+<ul>
+<li>ใช้ <code>.env</code> สำหรับเก็บ secrets — ไม่ commit <code>.env</code> ไปยัง Git</li>
+<li>ตั้งค่า <code>.gitignore</code> เพื่อป้องกันการ commit ไฟล์สำคัญ</li>
+<li>ใช้ <code>FERNET_KEY</code> สำหรับการเข้ารหัส Airflow</li>
+<li>ใช้ <code>MINIO_SECURE</code> เป็น <code>true</code> ใน production</li>
+<li>ไม่ใช้ค่า default ของ credentials ใน production</li>
+</ul>
+<h3 id="181-security-headers">18.1 Security Headers</h3>
+<pre class="hljs"><code><div>AIRFLOW__API_AUTH__JWT_SECRET=your-secure-jwt-secret
+FERNET_KEY=your-secure-fernet-key
+</div></code></pre>
+<hr>
+<h2 id="19-deployment">19. Deployment</h2>
+<h3 id="191-production-deployment-checklist">19.1 Production Deployment Checklist</h3>
+<ul>
+<li>ใช้ custom Airflow image แทนการติดตั้ง packages แบบ runtime</li>
+<li>ตั้งค่า environment variables ผ่าน secret manager</li>
+<li>เปิดใช้งาน SSL/TLS สำหรับทุก service</li>
+<li>ตั้งค่า backup strategy สำหรับ PostgreSQL และ MinIO</li>
+<li>ใช้ external PostgreSQL และ Redis แทนค่า default</li>
+</ul>
+<h3 id="192-cicd">19.2 CI/CD</h3>
+<p>GitHub Actions workflow อัตโนมัติ:</p>
+<pre class="hljs"><code><div>.git/
+└── workflows/
+    └── ci.yml   → รัน tests, lint, type check
+    └── cd.yml   →  deploy ไปยัง production (on release)
+</div></code></pre>
+<hr>
+<h2 id="20-monitoring--logging">20. Monitoring &amp; Logging</h2>
+<h3 id="201-%E0%B8%AA%E0%B8%B4%E0%B9%88%E0%B8%87%E0%B8%97%E0%B8%B5%E0%B9%88-monitor">20.1 สิ่งที่ Monitor</h3>
+<pre class="hljs"><code><div>Pipeline Status
+Task Duration
+Records Processed
+Records Failed
+Data Freshness
+Quality Score
+Error Rate
+Retry Count
+</div></code></pre>
+<h3 id="202-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1">20.2 สถาปัตยกรรม</h3>
+<pre class="hljs"><code><div>flowchart LR
+
+    PIPELINE[&quot;Pipeline&quot;]
+    LOGS[&quot;Logs&quot;]
+    METRICS[&quot;Metrics&quot;]
+    ALERT[&quot;Alerts&quot;]
+    DASHBOARD[&quot;Monitoring Dashboard&quot;]
+
+    PIPELINE --&gt; LOGS
+    PIPELINE --&gt; METRICS
+
+    LOGS --&gt; DASHBOARD
+    METRICS --&gt; DASHBOARD
+
+    METRICS --&gt; ALERT
+</div></code></pre>
+<h3 id="203-prometheus-targets">20.3 Prometheus Targets</h3>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prometheus</code></td>
+<td><code>localhost:9090</code></td>
+</tr>
+<tr>
+<td><code>airflow</code></td>
+<td><code>airflow-apiserver:8080</code></td>
+</tr>
+<tr>
+<td><code>postgres</code></td>
+<td><code>datawarehouse:5432</code></td>
+</tr>
+<tr>
+<td><code>minio</code></td>
+<td><code>minio:9000</code></td>
+</tr>
+<tr>
+<td><code>spark-master</code></td>
+<td><code>spark-master:8080</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="21-troubleshooting">21. Troubleshooting</h2>
+<h3 id="211-docker-compose-%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B9%80%E0%B8%A3%E0%B8%B4%E0%B9%88%E0%B8%A1">21.1 Docker Compose ไม่เริ่ม</h3>
+<ul>
+<li>ตรวจสอบว่า Docker Desktop ทำงานอยู่</li>
+<li>ตรวจสอบว่ามีพอ RAM (แนะนำ 8 GB+)</li>
+<li>ลองรัน <code>docker compose down -v</code> แล้ว <code>docker compose up -d</code> ใหม่</li>
+</ul>
+<h3 id="212-airflow-%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B9%84%E0%B8%94%E0%B9%89">21.2 Airflow เข้าไม่ได้</h3>
+<ul>
+<li>ตรวจสอบว่า <code>AIRFLOW_UID</code> ถูกตั้งค่าใน <code>.env</code></li>
+<li>ตรวจสอบ <code>docker compose logs airflow-apiserver</code></li>
+</ul>
+<h3 id="213-postgresql-connection-failed">21.3 PostgreSQL connection failed</h3>
+<ul>
+<li>ตรวจสอบว่า container <code>datawarehouse</code> ทำงานอยู่ (<code>docker compose ps</code>)</li>
+<li>ตรวจสอบ credentials ใน <code>.env</code></li>
+</ul>
+<h3 id="214-minio-%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B9%84%E0%B8%94%E0%B9%89">21.4 MinIO เข้าไม่ได้</h3>
+<ul>
+<li>ตรวจสอบว่า container <code>minio</code> ทำงานอยู่</li>
+<li>ใช้ <code>minioadmin</code> / <code>minioadmin</code> เป็น default credentials</li>
+</ul>
+<hr>
+<h2 id="22-development-guide">22. Development Guide</h2>
+<h3 id="221-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-pipeline-%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88">22.1 การพัฒนา Pipeline ใหม่</h3>
+<ol>
+<li>สร้างไฟล์ Python ใน <code>transformation/</code> หรือ <code>ingestion/</code></li>
+<li>เขียน DAG ใน <code>dags/</code></li>
+<li>สร้าง SQL script ใน <code>sql/</code> (เช่น <code>sql/staging/</code>, <code>sql/marts/</code>)</li>
+<li>ทดสอบ pipeline ด้วย <code>python &lt;script&gt;.py</code></li>
+<li>ตรวจสอบผลลัพธ์ใน PostgreSQL และ MinIO</li>
+</ol>
+<h3 id="222-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2-dbt-model">22.2 การพัฒนา dbt Model</h3>
+<ol>
+<li>สร้างไฟล์ SQL ใน <code>dbt/models/</code></li>
+<li>กำหนด materialization ใน <code>dbt_project.yml</code></li>
+<li>รัน <code>dbt debug</code> → <code>dbt run</code> → <code>dbt test</code></li>
+</ol>
+<h3 id="223-git-workflow">22.3 Git Workflow</h3>
+<pre class="hljs"><code><div>git checkout -b feature/new-pipeline
+<span class="hljs-comment"># ... ทำการพัฒนา ...</span>
+git add .
+git commit -m <span class="hljs-string">"Add new pipeline"</span>
+git push origin feature/new-pipeline
+</div></code></pre>
+<hr>
+<h2 id="23-versioning">23. Versioning</h2>
+<p>โปรเจกต์ใช้ Semantic Versioning (<a href="https://semver.org/">Semantic Versioning 2.0.0</a>):</p>
+<pre class="hljs"><code><div>MAJOR.MINOR.PATCH
+</div></code></pre>
+<ul>
+<li><strong>MAJOR</strong> — การเปลี่ยนแปลงที่ละลาย (breaking changes)</li>
+<li><strong>MINOR</strong> — ฟีเจอร์ใหม่ (backward compatible)</li>
+<li><strong>PATCH</strong> — แก้ไขบั๊ค (backward compatible)</li>
+</ul>
+<hr>
+<h2 id="24-changelog">24. Changelog</h2>
+<h3 id="v100-2026-09-22">v1.0.0 (2026-09-22)</h3>
+<ul>
+<li>Initial release — Bronze/Silver/Gold pipeline</li>
+<li>Apache Airflow orchestration (CeleryExecutor)</li>
+<li>MinIO Data Lake integration</li>
+<li>PostgreSQL Data Warehouse</li>
+<li>Data Quality checks</li>
+<li>Prometheus + Grafana monitoring</li>
+</ul>
+<hr>
+<h2 id="25-roadmap">25. Roadmap</h2>
+<pre class="hljs"><code><div>Phase 01  Foundation          ✓
+Phase 02  Data Ingestion      ✓
+Phase 03  Data Lake           ✓
+Phase 04  ETL / ELT           ✓
+Phase 05  Airflow             ✓
+Phase 06  dbt                 ✓
+Phase 07  Data Quality        ✓
+Phase 08  Data Warehouse      ✓
+Phase 09  Data Lineage        ✓
+Phase 10  Data Catalog        ✓
+Phase 11  Monitoring          ✓
+Phase 12  CI/CD               ✓
+Phase 13  Spark               ✓
+Phase 14  Production         🚧
+Phase 15  AI / RAG / Agent   🚧
+</div></code></pre>
+<hr>
+<h2 id="26-contributing">26. Contributing</h2>
+<ol>
+<li>Fork repository</li>
+<li>สร้าง feature branch (<code>git checkout -b feature/amazing-feature</code>)</li>
+<li>Commit การเปลี่ยนแปลง (<code>git commit -m 'Add: description'</code>)</li>
+<li>Push ไปยัง branch (<code>git push origin feature/amazing-feature</code>)</li>
+<li>เปิด Pull Request</li>
+</ol>
+<h3 id="261-development-setup">26.1 Development Setup</h3>
+<pre class="hljs"><code><div>git <span class="hljs-built_in">clone</span> https://github.com/MaaeYeng2517/data-engineering-platform.git
+<span class="hljs-built_in">cd</span> data-engineering-platform
+uv venv --python 3.13
+<span class="hljs-built_in">source</span> .venv/bin/activate
+uv pip install -r requirements.txt
+</div></code></pre>
+<hr>
+<h2 id="27-code-of-conduct">27. Code of Conduct</h2>
+<ul>
+<li>ใช้ภาษาที่เป็นสันติภาพและมื่นยืนยาง</li>
+<li>ให้เกียรย์ภูมิคุณและมุมมองที่แตกต่าง</li>
+<li>ไม่ยอมรับการพฤษฐภาคาร, ความหยาบคาย์ หรือการยั่วลงทะเมิง</li>
+<li>ให้ข้อเสนอและข้อวิจารณ์อย่างสร้างสรรค์</li>
+</ul>
+<hr>
+<h2 id="28-security-policy">28. Security Policy</h2>
+<h3 id="281-vulnerability-reporting">28.1 Vulnerability Reporting</h3>
+<p>หากพบ security vulnerability โปรดรายงานผ่านทาง <a href="https://github.com/MaaeYeng2517/data-engineering-platform/security/advisories">GitHub Security Advisory</a></p>
+<p>หรือส่งอีเมลถึง maintainers (ดูส่วน <em>Maintainers</em>)</p>
+<h3 id="282-supported-versions">28.2 Supported Versions</h3>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Supported</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.0.x</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="29-license">29. License</h2>
+<p>This project is licensed under the MIT License — see the <a href="LICENSE">LICENSE</a> file for details.</p>
+<pre class="hljs"><code><div>MIT License
+
+Copyright (c) 2026 Data Engineering Workflow Platform
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</div></code></pre>
+<hr>
+<h2 id="30-documentation">30. Documentation</h2>
+<ul>
+<li><a href="README.md">README.md</a> — เริ่มต้นและคู่มือการใช้งาน (ไฟล์นี้)</li>
+<li><a href="README.pdf">README.pdf</a> — เวอร์ชัน PDF ของ README</li>
+<li><a href="analytics/README.md">analytics/README.md</a> — เอกสาร dbt</li>
+<li><a href="backend/">backend/</a> — Knowledge Platform API และ SaaS backend</li>
+<li><a href="mobile/AGENTS.md">mobile/AGENTS.md</a> — คำแนะนำพัฒนา Mobile App</li>
+</ul>
+<hr>
+<h2 id="31-maintainers">31. Maintainers</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>GitHub</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MaaeYeng</td>
+<td><a href="https://github.com/MaaeYeng2517">@MaaeYeng2517</a></td>
+<td>Project Founder &amp; Lead Engineer</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="32-acknowledgements">32. Acknowledgements</h2>
+<ul>
+<li><a href="https://airflow.apache.org/">Apache Airflow</a> — Workflow Orchestration</li>
+<li><a href="https://www.getdbt.com/">dbt</a> — SQL Transformation</li>
+<li><a href="https://min.io/">MinIO</a> — Object Storage</li>
+<li><a href="https://www.postgresql.org/">PostgreSQL</a> — Data Warehouse</li>
+<li><a href="https://spark.apache.org/">Apache Spark</a> — Distributed Processing</li>
+<li><a href="https://prometheus.io/">Prometheus</a> — Monitoring</li>
+<li><a href="https://grafana.com/">Grafana</a> — Visualization</li>
+<li><a href="https://openlineage.io/">OpenLineage</a> — Data Lineage</li>
+</ul>
+<hr>
+<h2 id="33-contact">33. Contact</h2>
+<ul>
+<li><strong>GitHub Repository:</strong> https://github.com/MaaeYeng2517/data-engineering-platform</li>
+<li><strong>Issues:</strong> https://github.com/MaaeYeng2517/data-engineering-platform/issues</li>
+<li><strong>Author:</strong> MaaeYeng (<a href="https://github.com/MaaeYEng2517">@MaaeYEng2517</a>)</li>
+</ul>
+<hr>
+<h2 id="34-project-status">34. Project Status</h2>
+<p><strong>Active Development</strong></p>
+<p>โครงสร้างพื้นฐาน (Foundation → Spark) เสร็จสมบูรณ์และทดสอบแล้ว ขณะนี้อยู่ในขั้นตอนการพัฒนา Production Deployment และ AI / RAG Integration</p>
+
+</body>
+
+</html>

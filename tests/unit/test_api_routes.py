@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch, AsyncMock
-
 from fastapi.testclient import TestClient
 
 
@@ -9,8 +8,8 @@ class TestAPIRoutes:
 
     @pytest.fixture
     def client(self, monkeypatch):
-        monkeypatch.setattr("app.core.database.init_db", AsyncMock())
-        monkeypatch.setattr("app.core.minio_client.ensure_all_buckets", lambda x: None)
+        monkeypatch.setattr("app.main.startup_db", AsyncMock())
+        monkeypatch.setattr("app.main.startup_minio", AsyncMock())
 
         from app.main import app
         app.dependency_overrides = {}

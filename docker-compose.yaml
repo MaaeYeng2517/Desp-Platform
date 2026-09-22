@@ -65,6 +65,7 @@ services:
       POSTGRES_DB: datawarehouse
     volumes:
       - datawarehouse-db-volume:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/001-knowledge-platform.sql:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -551,48 +552,8 @@ services:
     restart: "no"
 
 # ============================================================
-# Knowledge Platform (from knowledge-platform/docker-compose.yaml)
+# Knowledge Platform (root source tree)
 # ============================================================
-  ke-postgres:
-    image: postgres:16
-    container_name: ke-postgres
-    environment:
-      POSTGRES_DB: knowledge_platform
-      POSTGRES_USER: ke_user
-      POSTGRES_PASSWORD: ke_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - ke_postgres_data:/var/lib/postgresql/data
-      - ./knowledge-platform/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ke_user -d knowledge_platform"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  ke-minio:
-    image: minio/minio:latest
-    container_name: ke-minio
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - ke_minio_data:/data
-
-  ke-redis:
-    image: redis:7-alpine
-    container_name: ke-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - ke_redis_data:/data
-    command: redis-server --appendonly yes
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: ke-elasticsearch
@@ -615,22 +576,27 @@ services:
 
   ke-backend:
     build:
-      context: ./knowledge-platform
+      context: .
       dockerfile: docker/backend.Dockerfile
     container_name: ke-backend
     depends_on:
-      - ke-postgres
-      - ke-minio
-      - ke-redis
-      - elasticsearch
-      - qdrant
+      datawarehouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+      qdrant:
+        condition: service_started
     environment:
       - APP_ENV=${APP_ENV:-development}
-      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@ke-postgres:5432/knowledge_platform}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-ke-minio:9000}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://dataeng:dataeng@datawarehouse:5432/datawarehouse}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - REDIS_URL=${REDIS_URL:-redis://ke-redis:6379/0}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
       - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
       - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
@@ -649,7 +615,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./knowledge-platform/backend:/app/backend
+      - ./backend:/app/backend
     command: uvicorn backend.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
     healthcheck:
@@ -660,9 +626,8 @@ services:
 
   ke-frontend:
     build:
-      context: ./knowledge-platform/frontend
+      context: ./frontend
       dockerfile: Dockerfile
-      target: frontend
     container_name: ke-frontend
     depends_on:
       ke-backend:
@@ -676,22 +641,27 @@ services:
 
   ke-worker:
     build:
-      context: ./knowledge-platform
+      context: .
       dockerfile: docker/worker.Dockerfile
     container_name: ke-worker
     depends_on:
-      - ke-postgres
-      - ke-minio
-      - ke-redis
-      - elasticsearch
-      - qdrant
+      datawarehouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+      qdrant:
+        condition: service_started
     environment:
       - APP_ENV=${APP_ENV:-development}
-      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://ke_user:ke_password@ke-postgres:5432/knowledge_platform}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-ke-minio:9000}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://dataeng:dataeng@datawarehouse:5432/datawarehouse}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      - REDIS_URL=${REDIS_URL:-redis://ke-redis:6379/0}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
       - ELASTICSEARCH_URL=${ELASTICSEARCH_URL:-http://elasticsearch:9200}
       - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-development-only-change-me}
@@ -699,7 +669,7 @@ services:
       - API_KEY_HMAC_SECRET=${API_KEY_HMAC_SECRET:-development-only-change-me}
       - DEBUG=${DEBUG:-false}
     volumes:
-      - ./knowledge-platform/workers:/app/workers
+      - ./workers:/app/workers
     command: python workers/worker.py
 
 volumes:
@@ -712,8 +682,5 @@ volumes:
   atlas-logs:
   postgres_data:
   minio_data:
-  ke_postgres_data:
-  ke_minio_data:
-  ke_redis_data:
   es_data:
   qdrant_data:
