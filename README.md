@@ -219,10 +219,14 @@ data-engineering-platform/
 │   └── src/
 │       └── entities/
 │
-├── knowledge-platform/
-│   ├── backend/
-│   ├── frontend/
-│   └── docker/
+├── backend/
+│   ├── app/                # FastAPI API, SaaS, auth, billing
+│   ├── config.py
+│   └── database.py
+├── frontend/               # Next.js SaaS web application
+├── workers/                # Knowledge Platform background worker
+├── docker/                 # Knowledge Platform container images and SQL
+├── scripts/                # Setup and operational scripts
 │
 ├── embedded/
 │   ├── main.py
@@ -1013,7 +1017,7 @@ SOFTWARE.
 * [README.md](README.md) — เริ่มต้นและคู่มือการใช้งาน (ไฟล์นี้)
 * [README.pdf](README.pdf) — เวอร์ชัน PDF ของ README
 * [analytics/README.md](analytics/README.md) — เอกสาร dbt
-* [knowledge-platform/README.md](knowledge-platform/README.md) — เอกสาร Knowledge Platform
+* [backend/](backend/) — Knowledge Platform API และ SaaS backend
 * [mobile/AGENTS.md](mobile/AGENTS.md) — คำแนะนำพัฒนา Mobile App
 
 ---

@@ -12,8 +12,8 @@ from typing import Any
 import pandas as pd
 from pyarrow import Table as ArrowTable
 from pyiceberg.catalog import Catalog
-from pyiceberg.partition import PartitionSpec
-from pyiceberg.table import PartitionField, SortOrder, Table
+from pyiceberg.partitioning import PartitionField, PartitionSpec
+from pyiceberg.table import SortOrder, Table
 from pyiceberg.transforms import Transform
 
 from warehouse.iceberg.catalog import IcebergCatalogManager, IcebergConfig, get_catalog
