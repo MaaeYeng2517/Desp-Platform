@@ -145,7 +145,7 @@ export default function SearchScreen() {
             {response.results.map((result) => (
               <View key={result.chunk.id} style={styles.result}>
                 <View style={styles.resultMeta}>
-                  <Text style={styles.resultSource}>{result.chunk.metadata?.documentId || result.chunk.sourceDocumentId}</Text>
+                  <Text style={styles.resultSource}>{String(result.chunk.metadata?.documentId || result.chunk.sourceDocumentId)}</Text>
                   <Text style={styles.resultScore}>{Math.round(result.score * 100)}%</Text>
                 </View>
                 <Text style={styles.resultText}>{result.chunk.content}</Text>

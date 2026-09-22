@@ -17,6 +17,9 @@ from app.models.dataset import Dataset
 from app.models.file_record import FileRecord
 from app.schemas.file_upload import FileUploadResponse
 from app.services.audit_service import AuditService
+
+
+class FileUploadService:
     """Service for handling file uploads to MinIO and tracking metadata."""
 
     def __init__(self, db: AsyncSession):
