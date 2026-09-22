@@ -1,7 +1,7 @@
 # Data Engineering Workflow Platform
 
 > Open Source Data Engineering Platform สำหรับสร้างและจัดการ Data Pipeline ตั้งแต่ Data Source → Data Lake → Transformation → Data Quality → Data Warehouse → Analytics → AI
-
+![logo](hhttps://github.com/MaaeYeng2517/data-engineering-setup-project/desp-km.png)
 ---
 
 # 1. Project Overview
