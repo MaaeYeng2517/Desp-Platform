@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_sales
+    columns:
+      - name: transaction_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+      - name: quantity
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+      - name: unit_price
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+  - name: fct_sales_daily
+    columns:
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: revenue
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      - name: units_sold
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0

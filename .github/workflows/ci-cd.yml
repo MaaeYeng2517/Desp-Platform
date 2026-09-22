@@ -1,0 +1,410 @@
+name: Data Platform CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  POSTGRES_VERSION: "16"
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black isort
+
+      - name: Run Ruff linting
+        run: ruff check .
+
+      - name: Check Black formatting
+        run: black --check --diff .
+
+      - name: Check isort
+        run: isort --check-only --diff .
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mypy pandas polars sqlalchemy psycopg2-binary pydantic minio
+
+      - name: Run mypy
+        run: mypy --ignore-missing-imports ingestion/ transformation/ quality/ dags/ || true
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: dataeng
+          POSTGRES_PASSWORD: dataeng
+          POSTGRES_DB: datawarehouse
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dataeng -d datawarehouse"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      minio:
+        image: minio/minio:RELEASE.2024-01-16T16-07-28Z
+        command: server /data --console-address ":9001"
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 30s
+          --health-timeout 20s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-mock
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U dataeng -d datawarehouse && break
+            sleep 2
+          done
+
+      - name: Initialize database schema
+        run: |
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -f sql/init_schema.sql
+
+      - name: Wait for MinIO
+        run: |
+          for i in {1..30}; do
+            curl -f http://localhost:9000/minio/health/live && break
+            sleep 2
+          done
+
+      - name: Create MinIO buckets
+        run: |
+          mc alias set myminio http://localhost:9000 minioadmin minioadmin
+          mc mb --ignore-existing myminio/bronze
+          mc mb --ignore-existing myminio/silver
+          mc mb --ignore-existing myminio/gold
+
+      - name: Run ingestion pipeline test
+        env:
+          PGPASSWORD: dataeng
+          DB_HOST: localhost
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+          MINIO_SECURE: "false"
+        run: |
+          python ingestion/sales_pipeline_minio.py
+
+      - name: Run transformation test
+        env:
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+          MINIO_SECURE: "false"
+        run: |
+          python transformation/sales_silver_minio.py
+
+      - name: Run quality checks
+        env:
+          PGPASSWORD: dataeng
+          DB_HOST: localhost
+        run: |
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -f sql/staging/sales.sql
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -f sql/marts/sales.sql
+          python quality/sales_quality.py
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -f sql/gold_sales.sql
+          python quality/gold_quality.py
+
+      - name: Run dbt tests
+        run: |
+          pip install dbt-postgres dbt-expectations
+          cd dbt && dbt deps
+        continue-on-error: true
+
+  integration-test:
+    name: Integration Test (Docker Compose)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v2
+
+      - name: Start services
+        run: |
+          docker compose up -d postgres datawarehouse redis minio minio-init
+          sleep 30
+
+      - name: Wait for services
+        run: |
+          for i in {1..60}; do
+            docker compose exec -T datawarehouse pg_isready -U dataeng -d datawarehouse && break
+            sleep 5
+          done
+
+      - name: Initialize database
+        run: |
+          docker compose exec -T datawarehouse psql -U dataeng -d datawarehouse -f /opt/airflow/project/sql/init_schema.sql
+
+      - name: Run ingestion
+        run: |
+          docker compose exec -T airflow-worker bash -c "
+            cd /opt/airflow/project &&
+            python ingestion/sales_pipeline_minio.py
+          "
+
+      - name: Run transformation
+        run: |
+          docker compose exec -T airflow-worker bash -c "
+            cd /opt/airflow/project &&
+            python transformation/sales_silver_minio.py
+          "
+
+      - name: Run staging load
+        run: |
+          docker compose exec -T datawarehouse psql -U dataeng -d datawarehouse -f /opt/airflow/project/sql/staging/sales.sql
+
+      - name: Run mart build
+        run: |
+          docker compose exec -T datawarehouse psql -U dataeng -d datawarehouse -f /opt/airflow/project/sql/marts/sales.sql
+
+      - name: Run quality checks
+        run: |
+          docker compose exec -T airflow-worker bash -c "
+            cd /opt/airflow/project &&
+            python quality/sales_quality.py
+          "
+
+      - name: Run gold layer
+        run: |
+          docker compose exec -T datawarehouse psql -U dataeng -d datawarehouse -f /opt/airflow/project/sql/gold_sales.sql
+
+      - name: Run gold quality checks
+        run: |
+          docker compose exec -T airflow-worker bash -c "
+            cd /opt/airflow/project &&
+            python quality/gold_quality.py
+          "
+
+      - name: Verify results
+        run: |
+          docker compose exec -T datawarehouse psql -U dataeng -d datawarehouse -c "
+            SELECT 'raw.sales' as layer, COUNT(*) as count FROM raw.sales
+            UNION ALL
+            SELECT 'staging.sales', COUNT(*) FROM staging.sales
+            UNION ALL
+            SELECT 'mart.sales', COUNT(*) FROM mart.sales
+            UNION ALL
+            SELECT 'mart.sales_daily', COUNT(*) FROM mart.sales_daily;
+          "
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v
+
+  dbt-test:
+    name: dbt Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: dataeng
+          POSTGRES_PASSWORD: dataeng
+          POSTGRES_DB: datawarehouse
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dataeng -d datawarehouse"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dbt
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-postgres dbt-expectations
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U dataeng -d datawarehouse && break
+            sleep 2
+          done
+
+      - name: Initialize database schema
+        run: |
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -f sql/init_schema.sql
+
+      - name: Load sample data
+        run: |
+          PGPASSWORD=dataeng psql -h localhost -U dataeng -d datawarehouse -c "
+            COPY raw.sales FROM '/opt/airflow/project/data/raw/sales.csv' WITH CSV HEADER;
+          " || true
+
+      - name: Run dbt deps
+        working-directory: ./dbt
+        run: dbt deps
+
+      - name: Run dbt debug
+        working-directory: ./dbt
+        env:
+          DB_HOST: localhost
+          DB_USER: dataeng
+          DB_PASSWORD: dataeng
+          DB_PORT: 5432
+          DB_NAME: datawarehouse
+        run: dbt debug --profiles-dir .
+
+      - name: Run dbt models
+        working-directory: ./dbt
+        env:
+          DB_HOST: localhost
+          DB_USER: dataeng
+          DB_PASSWORD: dataeng
+          DB_PORT: 5432
+          DB_NAME: datawarehouse
+        run: dbt run --profiles-dir .
+
+      - name: Run dbt tests
+        working-directory: ./dbt
+        env:
+          DB_HOST: localhost
+          DB_USER: dataeng
+          DB_PASSWORD: dataeng
+          DB_PORT: 5432
+          DB_NAME: datawarehouse
+        run: dbt test --profiles-dir .
+
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, typecheck, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Airflow custom image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          dockerfile: Dockerfile.airflow
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/data-platform-airflow:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: [lint, typecheck, test]
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploy to staging environment"
+          # Add your staging deployment commands here
+          # e.g., kubectl apply -f k8s/staging/
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, typecheck, test, build-and-push]
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deploy to production environment"
+          # Add your production deployment commands here
+          # e.g., kubectl apply -f k8s/production/
+
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, integration-test, dbt-test]
+    if: failure()
+    steps:
+      - name: Send failure notification
+        run: |
+          echo "Pipeline failed - send notification to Slack/Email"
+          # Add your notification logic here

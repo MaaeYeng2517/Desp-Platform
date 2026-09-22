@@ -1,0 +1,16 @@
+# Copy this to ~/.dbt/profiles.yml or set DBT_PROFILES_DIR
+data_platform:
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('DB_HOST', 'localhost') }}"
+      user: "{{ env_var('DB_USER', 'dataeng') }}"
+      password: "{{ env_var('DB_PASSWORD', 'dataeng') }}"
+      port: "{{ env_var('DB_PORT', '5432') }}"
+      dbname: "{{ env_var('DB_NAME', 'datawarehouse') }}"
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+      connect_timeout: 10
+      retries: 1
+  target: dev
