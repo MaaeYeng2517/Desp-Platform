@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, ErrorText, Input, Pill, Section, Screen, colors } from '../components/Ui';
-import { getFallbackApiBase, knowledgeBaseApi, normalizeApiBase } from '../lib/api';
-import { getApiBase, setApiBase } from '../lib/storage';
+import { Button, ErrorText, Input, Pill, Section, Screen, colors } from '../../components/Ui';
+import { getFallbackApiBase, knowledgeBaseApi, normalizeApiBase } from '../../lib/api';
+import { getApiBase, setApiBase } from '../../lib/storage';
 
 export default function SettingsScreen() {
   const [apiBase, setApiBaseValue] = useState(getFallbackApiBase());

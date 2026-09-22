@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Button, ErrorText, Input, Loading, Pill, Section, Screen, colors } from '../components/Ui';
-import { knowledgeBaseApi } from '../lib/api';
-import { createDefaultWorkflow, defaultComponents, categoryTone } from '../lib/constants';
-import { getApiBase } from '../lib/storage';
+import { Button, ErrorText, Input, Loading, Pill, Section, Screen, colors } from '../../components/Ui';
+import { knowledgeBaseApi } from '../../lib/api';
+import { createDefaultWorkflow, defaultComponents, categoryTone } from '../../lib/constants';
+import { getApiBase } from '../../lib/storage';
 import {
   ComponentDefinition,
   KnowledgeBaseInput,
@@ -13,7 +13,7 @@ import {
   WorkflowDefinition,
   WorkflowNode,
   WorkflowNodeType,
-} from '../lib/types';
+} from '../../lib/types';
 
 function componentFor(type: WorkflowNodeType): ComponentDefinition {
   return defaultComponents.find((component) => component.type === type) || defaultComponents[3];

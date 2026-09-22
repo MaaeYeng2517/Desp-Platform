@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { Button, ErrorText, Loading, Pill, Screen, Section, colors } from '../components/Ui';
-import { getFallbackApiBase, knowledgeBaseApi } from '../lib/api';
-import { getApiBase } from '../lib/storage';
-import { KnowledgeBaseRecord } from '../lib/types';
+import { Button, ErrorText, Loading, Pill, Screen, Section, colors } from '../../components/Ui';
+import { getFallbackApiBase, knowledgeBaseApi } from '../../lib/api';
+import { getApiBase } from '../../lib/storage';
+import { KnowledgeBaseRecord } from '../../lib/types';
 
 function statusTone(status: KnowledgeBaseRecord['status']) {
   if (status === 'ready') return 'success';
@@ -111,11 +111,10 @@ const styles = StyleSheet.create({
   cardMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
   cardMetaText: { color: colors.muted, fontSize: 11 },
   empty: { alignItems: 'center', padding: 18 },
-  emptyTitle: { color: colors.text, fontSize: 14, fontWeight: '750' },
+  emptyTitle: { color: colors.text, fontSize: 14, fontWeight: '700' },
   emptyText: { color: colors.muted, fontSize: 12, lineHeight: 17, marginTop: 5, textAlign: 'center' },
   pipeline: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
   pipelineItem: { alignItems: 'center', backgroundColor: 'rgba(148,170,205,0.06)', borderColor: colors.border, borderRadius: 10, borderWidth: 1, flexDirection: 'row', gap: 6, paddingHorizontal: 9, paddingVertical: 7 },
   pipelineDot: { borderRadius: 5, height: 7, width: 7 },
   pipelineLabel: { color: colors.muted, fontSize: 10, fontWeight: '700' },
-  border: 'rgba(148,170,205,0.18)',
 });

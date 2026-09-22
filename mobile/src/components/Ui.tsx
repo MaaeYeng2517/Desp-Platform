@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   section: { backgroundColor: colors.panel, borderColor: colors.border, borderRadius: 16, borderWidth: 1, marginBottom: 14, padding: 14 },
   sectionHeader: { alignItems: 'flex-start', flexDirection: 'row', gap: 10, justifyContent: 'space-between', marginBottom: 12 },
   eyebrow: { color: colors.accent, fontSize: 10, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' },
-  sectionTitle: { color: colors.text, fontSize: 16, fontWeight: '750', marginTop: 4 },
+  sectionTitle: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 4 },
   button: { alignItems: 'center', borderRadius: 10, justifyContent: 'center', minHeight: 40, paddingHorizontal: 13 },
   pressed: { opacity: 0.72 },
   primaryButton: { backgroundColor: colors.accent },

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Button, ErrorText, Input, Loading, Pill, Section, Screen, colors } from '../components/Ui';
-import { knowledgeBaseApi } from '../lib/api';
-import { defaultDocuments } from '../lib/constants';
-import { getApiBase } from '../lib/storage';
-import { KnowledgeBaseRecord, RetrieveResponse, SearchResponse, StatusResponse } from '../lib/types';
+import { Button, ErrorText, Input, Loading, Pill, Section, Screen, colors } from '../../components/Ui';
+import { knowledgeBaseApi } from '../../lib/api';
+import { defaultDocuments } from '../../lib/constants';
+import { getApiBase } from '../../lib/storage';
+import { KnowledgeBaseRecord, RetrieveResponse, SearchResponse, StatusResponse } from '../../lib/types';
 
 function parseDocuments(value: string) {
   const documents = JSON.parse(value || '[]');

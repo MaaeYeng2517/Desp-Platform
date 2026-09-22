@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Text, View } from 'react-native';
-import { colors } from '../components/Ui';
+import { ColorValue, Text, View } from 'react-native';
+import { colors } from '../../components/Ui';
 
-function TabIcon({ children, color }: { children: string; color: string }) {
+function TabIcon({ children, color }: { children: string; color: ColorValue }) {
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       <Text style={{ color, fontSize: 15, fontWeight: '900' }}>{children}</Text>
