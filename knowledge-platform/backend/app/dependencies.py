@@ -119,7 +119,7 @@ async def _authenticate_api_key(api_key_value: Optional[str], db: AsyncSession) 
     expected = hash_api_key(api_key_value)
     if not hmac_compare(key.key_hash, expected):
         return None
-    if key.expires_at and key.expires_at < datetime.utcnow():
+    if key.expires_at and key.expires_at.replace(tzinfo=None) < datetime.utcnow():
         return None
     if not key.user or not key.user.is_active or not key.tenant or not key.tenant.is_active:
         return None

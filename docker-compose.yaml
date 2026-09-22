@@ -517,7 +517,7 @@ services:
 
   atlas-secondary:
     image: sburn/apache-atlas:2.3.0
-    container_name: de-atlas
+    container_name: de-atlas-secondary
     environment:
       ATLAS_SERVER_HEAP: 1536m
       ATLAS_USERNAME: admin
@@ -525,8 +525,8 @@ services:
     ports:
       - "21000:21000"
     volumes:
-      - atlas_data:/apache-atlas/data
-      - atlas_logs:/apache-atlas/logs
+      - atlas-data:/apache-atlas/data
+      - atlas-logs:/apache-atlas/logs
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS -u admin:admin http://localhost:21000/api/atlas/admin/version >/dev/null"]
       interval: 30s
@@ -537,7 +537,7 @@ services:
 
   atlas-init-secondary:
     image: curlimages/curl:8.10.1
-    container_name: de-atlas-init
+    container_name: de-atlas-init-secondary
     environment:
       ATLAS_ENDPOINT: http://atlas-secondary:21000
       ATLAS_USERNAME: admin
