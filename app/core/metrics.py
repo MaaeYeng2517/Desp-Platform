@@ -1,5 +1,5 @@
 import os
-from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_PROMETHEUS
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
 
 
@@ -55,7 +55,7 @@ UPLOAD_SIZE = Histogram(
 def metrics_endpoint(request):
     return Response(
         content=generate_latest(),
-        media_type=CONTENT_TYPE_PROMETHEUS,
+        media_type=CONTENT_TYPE_LATEST,
     )
 
 

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 
 from app.api.deps import get_cleaning_service
 from app.schemas.validation import CleaningRequest, ValidationResult
@@ -41,14 +41,10 @@ async def clean_file(
 @router.post("/preview", response_model=dict)
 async def preview_cleaning(
     params: CleaningRequest,
-    file: UploadFile = None,
+    file: UploadFile = File(...),
 ):
     import io
     import pandas as pd
-    from fastapi import UploadFile as FAUploadFile, File, HTTPException
-
-    if file is None:
-        raise HTTPException(status_code=400, detail="No file provided")
 
     content = await file.read()
     df = pd.read_csv(io.BytesIO(content))

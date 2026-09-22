@@ -1,29 +1,25 @@
 import pytest
+import pandas as pd
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from uuid import uuid4
 
 from app.services.metadata_service import MetadataService
 from app.services.audit_service import AuditService
 from app.models.audit_log import AuditLog
-from app.schemas.audit_log import AuditAction, AuditStatus
+from app.schemas.audit_log import AuditLogFilter
 
 
 class TestMetadataService:
 
     def test_extract_from_file_returns_schema(self):
-        from unittest.mock import MagicMock
-
         mock_file = MagicMock()
         mock_file.dataset_id = uuid4()
 
         service = MetadataService(Mock())
 
-        import pandas as pd
-        import io
-
+        csv_data = b"transaction_id,quantity\nTX001,2\nTX002,1\n"
         mock_client = Mock()
         mock_response = Mock()
-        csv_data = b"transaction_id,quantity\nTX001,2\nTX002,1\n"
         mock_response.read.return_value = csv_data
         mock_client.get_object.return_value = mock_response
 
@@ -53,32 +49,58 @@ class TestAuditService:
             dataset_id=uuid4(),
         )
 
-        assert mock_db.add.called
-        assert mock_db.commit.called
-        assert mock_db.refresh.called
+        mock_db.add.assert_called_once()
+        mock_db.commit.assert_awaited()
+        mock_db.refresh.assert_awaited()
 
     @pytest.mark.asyncio
     async def test_get_by_id_not_found(self):
         mock_db = AsyncMock()
-        mock_db.execute = AsyncMock(return_value=AsyncMock(scalar_one_or_none=AsyncMock(return_value=None)))
-        service = AuditService(mock_db)
+        mock_result = AsyncMock()
+        mock_result.scalar_one_or_none = AsyncMock(return_value=None)
+        mock_db.execute = AsyncMock(return_value=mock_result)
 
+        service = AuditService(mock_db)
         result = await service.get_by_id(uuid4())
         assert result is None
 
     @pytest.mark.asyncio
-    async def test_query_with_filters(self):
-        from app.schemas.audit_log import AuditLogFilter
-        from app.models.audit_log import AuditLog
-
+    async def test_get_by_id_found(self):
+        mock_record = Mock()
         mock_db = AsyncMock()
         mock_result = AsyncMock()
-        mock_result.scalars.return_value.all.return_value = []
+        mock_result.scalar_one_or_none = AsyncMock(return_value=mock_record)
+        mock_db.execute = AsyncMock(return_value=mock_result)
+
+        service = AuditService(mock_db)
+        result = await service.get_by_id(uuid4())
+        assert result == mock_record
+
+    @pytest.mark.asyncio
+    async def test_query_with_filters(self):
+        mock_db = AsyncMock()
+        mock_result = AsyncMock()
+        mock_scalars = AsyncMock()
+        mock_scalars.all = Mock(return_value=[])
+        mock_result.scalars = Mock(return_value=mock_scalars)
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         service = AuditService(mock_db)
         filter = AuditLogFilter(action="create", user="test_user")
         results = await service.query(filter=filter, limit=10, offset=0)
+        assert results == []
+
+    @pytest.mark.asyncio
+    async def test_get_by_dataset(self):
+        mock_db = AsyncMock()
+        mock_result = AsyncMock()
+        mock_scalars = AsyncMock()
+        mock_scalars.all = Mock(return_value=[])
+        mock_result.scalars = Mock(return_value=mock_scalars)
+        mock_db.execute = AsyncMock(return_value=mock_result)
+
+        service = AuditService(mock_db)
+        results = await service.get_by_dataset(uuid4(), limit=50)
         assert results == []
 
 

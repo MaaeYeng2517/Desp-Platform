@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import get_dataset_service
 from app.schemas.dataset import DatasetCreate, DatasetRead, DatasetUpdate, DatasetStatus
+from app.services.dataset_service import DatasetService
 from app.models.dataset import Dataset
 
 router = APIRouter(
@@ -16,7 +17,7 @@ router = APIRouter(
 @router.post("/", response_model=DatasetRead, status_code=status.HTTP_201_CREATED)
 async def create_dataset(
     data: DatasetCreate,
-    service: DatasetService := Depends(get_dataset_service),
+    service: DatasetService = Depends(get_dataset_service),
     current_user: str = "system",
 ):
     existing = await service.get_by_name(data.name)
