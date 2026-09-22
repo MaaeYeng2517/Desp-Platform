@@ -7,10 +7,16 @@ Unit tests for quality checks.
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from sqlalchemy import create_engine, text
+from contextlib import contextmanager
 
 from quality.sales_quality import check_quality
 from quality.gold_quality import run_quality
+
+
+@contextmanager
+def mock_connection_context(mock_conn):
+    """Mock context manager for database connection."""
+    yield mock_conn
 
 
 class TestSalesQuality:
@@ -20,7 +26,7 @@ class TestSalesQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         # All checks return 0 (no violations)
         mock_conn.execute.return_value.scalar.return_value = 0
@@ -36,7 +42,7 @@ class TestSalesQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         # First check (duplicates) returns 1, rest return 0
         mock_conn.execute.return_value.scalar.side_effect = [1, 0, 0, 0]
@@ -50,7 +56,7 @@ class TestSalesQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         # Second check (quantity) returns 1
         mock_conn.execute.return_value.scalar.side_effect = [0, 1, 0, 0]
@@ -64,7 +70,7 @@ class TestSalesQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         # Third check (price) returns 1
         mock_conn.execute.return_value.scalar.side_effect = [0, 0, 1, 0]
@@ -78,7 +84,7 @@ class TestSalesQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         # Fourth check (null customer) returns 1
         mock_conn.execute.return_value.scalar.side_effect = [0, 0, 0, 1]
@@ -94,7 +100,7 @@ class TestGoldQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         mock_conn.execute.return_value.scalar.return_value = 0
 
@@ -108,7 +114,7 @@ class TestGoldQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         mock_conn.execute.return_value.scalar.side_effect = [1, 0, 0]
 
@@ -121,7 +127,7 @@ class TestGoldQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         mock_conn.execute.return_value.scalar.side_effect = [0, 1, 0]
 
@@ -134,7 +140,7 @@ class TestGoldQuality:
         mock_engine = Mock()
         mock_conn = Mock()
         mock_create_engine.return_value = mock_engine
-        mock_engine.connect.return_value.__enter__.return_value = mock_conn
+        mock_engine.connect.return_value = mock_connection_context(mock_conn)
 
         mock_conn.execute.return_value.scalar.side_effect = [0, 0, 1]
 

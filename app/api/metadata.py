@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_metadata_service
+from app.api.deps import get_metadata_service, get_db
 from app.schemas.metadata import DatasetMetadataCreate, DatasetMetadataRead, MetadataSummary, SchemaColumn
 from app.services.metadata_service import MetadataService
 from app.models.dataset import Dataset
@@ -85,21 +85,23 @@ async def get_metadata_summary(
     files = files_result.scalars().all()
 
     metadata_result = await db.execute(
-        select(MetadataService).where(MetadataService.__model__.dataset_id == dataset_id)
+        select(DatasetMetadata).where(DatasetMetadata.dataset_id == dataset_id)
     )
-    metadata = None
-    try:
-        metadata_row = metadata_result.scalar_one_or_none()
-        if metadata_row:
-            metadata = metadata_row
-    except Exception:
-        pass
+    metadata = metadata_result.scalar_one_or_none()
+
+    columns: List[SchemaColumn] = []
+    if metadata and metadata.schema_definition:
+        for col in metadata.schema_definition:
+            columns.append(SchemaColumn(**col))
+
+    row_count = files[0].row_count if files and files[0].row_count else None
+    file_size = files[0].file_size if files else None
 
     return MetadataSummary(
         dataset_id=dataset_id,
         dataset_name=dataset.name,
         file_format=metadata.file_format if metadata else "csv",
-        columns=[],
-        row_count=files[0].row_count if files and files[0].row_count else None,
-        file_size=files[0].file_size if files else None,
+        columns=columns,
+        row_count=row_count,
+        file_size=file_size,
     )

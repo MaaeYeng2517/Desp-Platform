@@ -54,7 +54,7 @@ class TestTransform:
     @patch("transformation.sales_silver_minio.download_from_minio")
     @patch("transformation.sales_silver_minio.upload_to_minio")
     @patch("transformation.sales_silver_minio.Path.mkdir")
-    @patch("transformation.sales_silver_minio.DataFrame.to_csv")
+    @patch("pandas.DataFrame.to_csv")
     @patch("transformation.sales_silver_minio.pd.read_csv")
     def test_transform_bronze_to_silver_to_gold(
         self,
@@ -102,7 +102,7 @@ class TestTransformEdgeCases:
     @patch("transformation.sales_silver_minio.download_from_minio")
     @patch("transformation.sales_silver_minio.upload_to_minio")
     @patch("transformation.sales_silver_minio.Path.mkdir")
-    @patch("transformation.sales_silver_minio.DataFrame.to_csv")
+    @patch("pandas.DataFrame.to_csv")
     @patch("transformation.sales_silver_minio.pd.read_csv")
     def test_transform_removes_invalid_quantity(
         self,

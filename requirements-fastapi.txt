@@ -1,0 +1,12 @@
+fastapi==0.115.6
+uvicorn==0.34.0
+asyncpg==0.30.0
+psycopg2-binary==2.9.12
+SQLAlchemy==2.0.52
+pydantic==2.10.4
+pydantic-settings==2.10.1
+pydantic-core==2.27.2
+python-multipart==0.0.18
+minio==7.2.0
+pandas==3.0.2
+aiofiles==24.1.0

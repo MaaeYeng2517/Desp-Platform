@@ -444,6 +444,31 @@ services:
       - prometheus
     restart: always
 
+  # Data Core Platform API (FastAPI)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: de-api
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: datawarehouse
+      DB_PORT: 5432
+      DB_USER: dataeng
+      DB_PASSWORD: dataeng
+      DB_NAME: datawarehouse
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_SECURE: "false"
+    depends_on:
+      datawarehouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: always
+
 volumes:
   postgres-db-volume:
   datawarehouse-db-volume:

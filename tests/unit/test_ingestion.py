@@ -137,7 +137,8 @@ class TestTransform:
 
 class TestLoadToPostgres:
     @patch("ingestion.sales_pipeline_minio.create_engine")
-    def test_load_to_postgres_calls_to_sql(self, mock_create_engine):
+    @patch("pandas.DataFrame.to_sql")
+    def test_load_to_postgres_calls_to_sql(self, mock_to_sql, mock_create_engine):
         """Test load_to_postgres calls to_sql with correct parameters."""
         mock_engine = Mock()
         mock_create_engine.return_value = mock_engine
@@ -155,13 +156,14 @@ class TestLoadToPostgres:
         load_to_postgres(df)
 
         mock_create_engine.assert_called_once()
-        # Verify to_sql was called on the DataFrame
-        # Note: We can't easily test the exact call without more mocking
+        mock_to_sql.assert_called_once()
 
 
 class TestLoadToMinio:
     @patch("ingestion.sales_pipeline_minio.get_minio_client")
-    def test_load_to_minio_uploads_file(self, mock_get_client):
+    @patch("ingestion.sales_pipeline_minio.Path.mkdir")
+    @patch("pandas.DataFrame.to_csv")
+    def test_load_to_minio_uploads_file(self, mock_to_csv, mock_mkdir, mock_get_client):
         """Test load_to_minio uploads file to MinIO."""
         mock_client = Mock()
         mock_get_client.return_value = mock_client
@@ -176,12 +178,11 @@ class TestLoadToMinio:
             "total_amount": [200.00],
         })
 
-        with patch("ingestion.sales_pipeline_minio.Path.mkdir") as mock_mkdir:
-            with patch("ingestion.sales_pipeline_minio.DataFrame.to_csv") as mock_to_csv:
-                load_to_minio(df, mock_client)
-                mock_mkdir.assert_called_once()
-                mock_to_csv.assert_called_once()
-                mock_client.fput_object.assert_called_once()
+        load_to_minio(df, mock_client)
+
+        mock_mkdir.assert_called_once()
+        mock_to_csv.assert_called_once()
+        mock_client.fput_object.assert_called_once()
 
 
 if __name__ == "__main__":
