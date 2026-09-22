@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Data Engineering Workflow Platform
+# Licensed under the MIT License
+
 from sqlalchemy import create_engine, text
 from os import getenv
 
