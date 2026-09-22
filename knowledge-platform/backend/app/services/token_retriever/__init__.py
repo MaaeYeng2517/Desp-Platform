@@ -75,7 +75,8 @@ class TokenEmbeddedChunkRetriever:
             vector_size=embedding_dim,
         )
         self.vector_index = VectorIndex()
-        # Expose embedding dim from the loaded service
+        # Ensure VectorIndex and retriever share the same embedder
+        self.vector_index._service = self.embedder
         self.vector_index.dim = embedding_dim
 
     # ------------------------------------------------------------------
