@@ -139,7 +139,7 @@ class SubscriptionResponse(BaseModel):
     canceled_at: Optional[datetime]
     trial_start: Optional[datetime]
     trial_end: Optional[datetime]
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = Field(alias="data", serialization_alias="metadata")
     created_at: datetime
     updated_at: datetime
 

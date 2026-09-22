@@ -29,8 +29,9 @@ function Brand() {
 }
 
 function DesktopNavigation() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const [loggingOut, setLoggingOut] = useState(false);
   const memberLinks = [
     { href: '/dashboard', label: 'แดชบอร์ด' },
     { href: '/api-keys', label: 'API Keys' },
@@ -89,6 +90,21 @@ function DesktopNavigation() {
               ผู้ดูแลระบบ
             </Link>
           )}
+          <button
+            type="button"
+            disabled={loggingOut}
+            onClick={async () => {
+              setLoggingOut(true);
+              try {
+                await logout();
+              } finally {
+                setLoggingOut(false);
+              }
+            }}
+            className="ml-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-white hover:bg-gray-50 disabled:cursor-wait disabled:opacity-50"
+          >
+            {loggingOut ? 'กำลังออก' : 'ออกจากระบบ'}
+          </button>
         </>
       ) : (
         <div className="ml-2 flex items-center gap-2">

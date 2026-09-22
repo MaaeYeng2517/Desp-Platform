@@ -22,6 +22,7 @@ class Tenant(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     users = relationship("User", back_populates="tenant")
+    knowledge_bases = relationship("KnowledgeBase", back_populates="tenant")
     subscriptions = relationship("Subscription", back_populates="tenant")
     membership_plans = relationship("MembershipPlan", back_populates="tenant")
     api_keys = relationship("ApiKey", back_populates="tenant")

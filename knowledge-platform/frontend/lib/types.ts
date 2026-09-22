@@ -66,6 +66,51 @@ export interface Entitlement {
   current_period_end: string | null;
 }
 
+export interface KnowledgeBase {
+  id: string;
+  tenant_id: string;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  slug: string;
+  settings: Record<string, unknown>;
+  is_published: boolean;
+  status: string;
+  version: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SearchResult {
+  chunk_id: string;
+  document_id: string;
+  title: string;
+  content: string;
+  score: number;
+  metadata: Record<string, unknown>;
+  sources: string[];
+}
+
+export interface SearchResponse {
+  query: string;
+  results: SearchResult[];
+  total: number;
+  latency_ms: number;
+}
+
+export interface Workflow {
+  id: string;
+  kb_id: string;
+  name: string;
+  description: string | null;
+  nodes: Array<Record<string, unknown>>;
+  edges: Array<Record<string, unknown>>;
+  is_active: boolean;
+  version: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type ApiKeyScope =
   | 'read'
   | 'write'

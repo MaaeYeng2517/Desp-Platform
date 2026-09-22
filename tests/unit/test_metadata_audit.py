@@ -57,7 +57,7 @@ class TestAuditService:
     async def test_get_by_id_not_found(self):
         mock_db = AsyncMock()
         mock_result = AsyncMock()
-        mock_result.scalar_one_or_none = AsyncMock(return_value=None)
+        mock_result.scalar_one_or_none = Mock(return_value=None)
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         service = AuditService(mock_db)
@@ -69,7 +69,7 @@ class TestAuditService:
         mock_record = Mock()
         mock_db = AsyncMock()
         mock_result = AsyncMock()
-        mock_result.scalar_one_or_none = AsyncMock(return_value=mock_record)
+        mock_result.scalar_one_or_none = Mock(return_value=mock_record)
         mock_db.execute = AsyncMock(return_value=mock_result)
 
         service = AuditService(mock_db)
