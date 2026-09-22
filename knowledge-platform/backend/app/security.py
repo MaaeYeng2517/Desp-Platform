@@ -8,7 +8,6 @@ from typing import Optional
 import bcrypt
 import jwt
 from fastapi import Response
-from sqlalchemy import select
 
 from backend.config import (
     API_KEY_HMAC_SECRET,

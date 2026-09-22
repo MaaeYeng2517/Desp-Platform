@@ -27,7 +27,7 @@ from backend.app.security import (
     verify_csrf_token,
     verify_password,
 )
-from backend.config import ADMIN_EMAILS
+from backend.config import ADMIN_EMAILS, COOKIE_SAMESITE, COOKIE_SECURE
 from backend.database import get_db
 
 router = APIRouter()
@@ -228,9 +228,8 @@ async def csrf_token(
         CSRF_COOKIE_NAME,
         token,
         max_age=60 * 60,
-        httponly=False,
-        secure=False,
-        samesite="lax",
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
         path="/",
     )
     return {"csrf_token": token}

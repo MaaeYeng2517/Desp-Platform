@@ -4,8 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 import jwt
-from fastapi import Cookie, Depends, Header, HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -22,8 +21,6 @@ from backend.app.security import (
 from backend.config import ADMIN_EMAILS
 from backend.database import get_db
 
-security = HTTPBearer(auto_error=False)
-
 
 @dataclass
 class AccessPrincipal:
@@ -33,10 +30,9 @@ class AccessPrincipal:
 
 async def get_current_user(
     request: Request,
-    access_token: Optional[str] = Cookie(None, alias=ACCESS_TOKEN_COOKIE_NAME),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    token = get_bearer_token(request.headers.get("authorization")) or access_token
+    token = get_bearer_token(request.headers.get("authorization")) or request.cookies.get(ACCESS_TOKEN_COOKIE_NAME)
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
@@ -61,11 +57,10 @@ async def get_current_user(
 
 async def get_current_user_optional(
     request: Request,
-    access_token: Optional[str] = Cookie(None, alias=ACCESS_TOKEN_COOKIE_NAME),
     db: AsyncSession = Depends(get_db),
 ) -> Optional[User]:
     try:
-        return await get_current_user(request, access_token, db)
+        return await get_current_user(request, db)
     except HTTPException:
         return None
 
@@ -109,7 +104,7 @@ async def require_active_membership(
     return user
 
 
-def _authenticate_api_key(api_key_value: Optional[str], db: AsyncSession) -> Optional[ApiKey]:
+async def _authenticate_api_key(api_key_value: Optional[str], db: AsyncSession) -> Optional[ApiKey]:
     if not api_key_value or not api_key_value.startswith("kep_"):
         return None
     prefix = api_key_value[:16]
@@ -140,7 +135,7 @@ async def require_api_key(
     x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
     db: AsyncSession = Depends(get_db),
 ) -> ApiKey:
-    key = _authenticate_api_key(x_api_key, db)
+    key = await _authenticate_api_key(x_api_key, db)
     if not key:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API key")
     return key
@@ -148,7 +143,8 @@ async def require_api_key(
 
 async def require_api_scope(required_scope: ApiKeyScope):
     async def dependency(key: ApiKey = Depends(require_api_key)) -> ApiKey:
-        if required_scope not in key.scopes and ApiKeyScope.ADMIN not in key.scopes:
+        scopes = {str(scope) for scope in key.scopes}
+        if required_scope.value not in scopes and ApiKeyScope.ADMIN.value not in scopes:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Scope '{required_scope.value}' required")
         return key
 
@@ -160,7 +156,7 @@ async def require_platform_access(
     x_api_key: Optional[str] = Header(None, alias="X-API-Key"),
     db: AsyncSession = Depends(get_db),
 ) -> AccessPrincipal:
-    key = _authenticate_api_key(x_api_key, db)
+    key = await _authenticate_api_key(x_api_key, db)
     if key:
         subscription = await get_active_subscription(db, key.user)
         if key.user.role != UserRole.ADMIN and not subscription:
@@ -170,7 +166,7 @@ async def require_platform_access(
             )
         return AccessPrincipal(user=key.user, api_key=key)
 
-    user = await get_current_user(request, db=db)
+    user = await get_current_user(request, db)
     if user.role == UserRole.ADMIN or user.is_superuser:
         return AccessPrincipal(user=user)
     subscription = await get_active_subscription(db, user)
