@@ -41,7 +41,6 @@ from backend.app.models import (
     tenant,
     user,
     workflow,
-    relationship,
 )
 
 

@@ -17,7 +17,7 @@ from backend.app.schemas import (
     AdminStatsResponse, AdminUserListResponse, AdminTenantListResponse,
     UserResponse, TenantResponse, UserUpdate, UserRole as SchemaUserRole
 )
-from backend.app.api.auth import get_current_user, require_admin
+from backend.app.dependencies import require_admin
 
 router = APIRouter()
 

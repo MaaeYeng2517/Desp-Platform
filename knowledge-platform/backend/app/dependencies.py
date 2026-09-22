@@ -141,7 +141,7 @@ async def require_api_key(
     return key
 
 
-async def require_api_scope(required_scope: ApiKeyScope):
+def require_api_scope(required_scope: ApiKeyScope):
     async def dependency(key: ApiKey = Depends(require_api_key)) -> ApiKey:
         scopes = {str(scope) for scope in key.scopes}
         if required_scope.value not in scopes and ApiKeyScope.ADMIN.value not in scopes:

@@ -64,7 +64,7 @@ class Subscription(Base):
     canceled_at = Column(DateTime)
     trial_start = Column(DateTime)
     trial_end = Column(DateTime)
-    metadata = Column(JSON, default=dict, nullable=False)
+    data = Column("metadata", JSON, default=dict, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

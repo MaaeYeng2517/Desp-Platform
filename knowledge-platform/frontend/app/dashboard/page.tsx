@@ -1,115 +1,117 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
+import { api, getErrorMessage } from '@/lib/api/client';
+import { formatDate, formatNumber } from '@/lib/format';
+import type { Entitlement, Subscription } from '@/lib/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-interface DashboardStats {
-  documents: number;
-  chunks: number;
-  embeddings: number;
-  published: number;
-  failed: number;
-  processing: number;
-  recall: number;
-  mrr: number;
-  latency: number;
-}
-
-export default function Dashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+export function DashboardContent() {
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
+  const load = async () => {
+    setLoading(true);
+    setError(undefined);
     try {
-      // In production, fetch from API
-      // const response = await axios.get(`${API_URL}/api/v1/dashboard/stats`);
-      // setStats(response.data);
-      
-      // Mock data for now
-      setStats({
-        documents: 1240,
-        chunks: 38420,
-        embeddings: 38420,
-        published: 1180,
-        failed: 12,
-        processing: 48,
-        recall: 0.91,
-        mrr: 0.87,
-        latency: 180
-      });
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      const [entitlementResponse, subscriptionResponse] = await Promise.all([
+        api.get<Entitlement>('/api/v1/billing/entitlement'),
+        api.get<Subscription | null>('/api/v1/billing/subscription'),
+      ]);
+      setEntitlement(entitlementResponse.data);
+      setSubscription(subscriptionResponse.data);
+    } catch (requestError) {
+      setError(getErrorMessage(requestError));
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="p-8">Loading...</div>;
-  }
+  useEffect(() => {
+    void load();
+  }, []);
+
+  if (loading) return <LoadingState label="กำลังโหลดแดชบอร์ด" />;
+  if (error) return <ErrorState message={error} onRetry={load} />;
+  if (!entitlement) return <EmptyState title="ยังไม่มีข้อมูลสมาชิก" message="ไม่พบสิทธิ์การใช้งานของบัญชีนี้ โปรดติดต่อทีมสนับสนุน" />;
+
+  const activeStatuses = new Set(['active', 'trialing']);
+  const statusLabel: Record<string, string> = {
+    active: 'ใช้งานได้',
+    trialing: 'ทดลองใช้งาน',
+    past_due: 'ชำระเงินล่าช้า',
+    unpaid: 'ยังไม่ชำระ',
+    canceled: 'ยกเลิกแล้ว',
+    incomplete: 'อยู่ระหว่างสร้าง',
+    incomplete_expired: 'หมดอายุ',
+    paused: 'พักการใช้งาน',
+  };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500">Documents</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.documents}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500">Chunks</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.chunks}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500">Embeddings</h3>
-          <p className="text-3xl font-bold mt-2">{stats?.embeddings}</p>
-        </div>
-      </div>
+    <div className="bg-gray-50 py-12 sm:py-16">
+      <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8">
+        <PageHeader
+          eyebrow="Member Workspace"
+          title={`สวัสดีคุณ ${entitlement.plan}`}
+          description="ภาพรวมสมาชิก สิทธิ์การใช้งาน และเครื่องมือสำหรับพัฒนาแพลตฟอร์มความรู้"
+          action={<Link href="/api-keys" className="inline-flex rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-800">สร้าง API Key</Link>}
+        />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Document Status</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>Published</span>
-              <span className="font-semibold text-green-600">{stats?.published}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Failed</span>
-              <span className="font-semibold text-red-600">{stats?.failed}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Processing</span>
-              <span className="font-semibold text-yellow-600">{stats?.processing}</span>
-            </div>
-          </div>
-        </div>
+        <section aria-label="สถานะสมาชิก" className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: 'แผนปัจจุบัน', value: entitlement.plan, className: 'text-primary-700' },
+            { label: 'สถานะ', value: statusLabel[entitlement.status] || entitlement.status, className: activeStatuses.has(entitlement.status) ? 'text-emerald-700' : 'text-amber-700' },
+            { label: 'โควตา API', value: formatNumber(entitlement.api_calls_limit), suffix: 'calls / month', className: 'text-gray-700' },
+            { label: 'ครบกำหนด', value: formatDate(entitlement.current_period_end), className: 'text-gray-700' },
+          ].map((item) => (
+            <article key={item.label} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-medium text-gray-500">{item.label}</p>
+              <p className={`mt-3 text-2xl font-bold ${item.className}`}>{item.value}</p>
+              {item.suffix && <p className="mt-1 text-xs text-gray-500">{item.suffix}</p>}
+            </article>
+          ))}
+        </section>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Retrieval Performance</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>Recall</span>
-              <span className="font-semibold">{(stats?.recall || 0) * 100}%</span>
+        <section className="mt-8 grid gap-6 lg:grid-cols-3">
+          <article className="rounded-2xl border border-gray-200 bg-white p-7 shadow-sm lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Current entitlement</p>
+                <h2 className="mt-2 text-xl font-bold text-gray-900">สิทธิ์ที่พร้อมใช้งาน</h2>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${activeStatuses.has(entitlement.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                {entitlement.status}
+              </span>
             </div>
-            <div className="flex justify-between">
-              <span>MRR</span>
-              <span className="font-semibold">{stats?.mrr}</span>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {(entitlement.features.length ? entitlement.features : ['ไม่มีคุณสมบัติเพิ่มเติม']).map((feature) => (
+                <li key={feature} className="flex items-center gap-3 rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
+                  <span className="text-primary-700">✓</span>{feature}
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="rounded-2xl bg-gray-950 p-7 text-white shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Quick actions</p>
+            <h2 className="mt-2 text-xl font-bold">จัดการทีมและ API</h2>
+            <div className="mt-6 space-y-3">
+              <Link href="/api-keys" className="flex items-center justify-between rounded-xl bg-white/10 p-4 text-sm font-semibold hover:bg-white/15">API Keys <span>→</span></Link>
+              <Link href="/billing" className="flex items-center justify-between rounded-xl bg-white/10 p-4 text-sm font-semibold hover:bg-white/15">การเรียกเก็บเงิน <span>→</span></Link>
+              <Link href="/contact" className="flex items-center justify-between rounded-xl bg-white/10 p-4 text-sm font-semibold hover:bg-white/15">ติดต่อสนับสนุน <span>→</span></Link>
             </div>
-            <div className="flex justify-between">
-              <span>Latency</span>
-              <span className="font-semibold">{stats?.latency} ms</span>
-            </div>
-          </div>
-        </div>
+          </article>
+        </section>
       </div>
     </div>
   );
+}
+
+export default function DashboardPage() {
+  return <ProtectedRoute><DashboardContent /></ProtectedRoute>;
 }

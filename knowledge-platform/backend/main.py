@@ -23,12 +23,11 @@ from backend.app.api import (
     workflows,
 )
 from backend.app.dependencies import require_platform_user
-from backend.app.security import verify_csrf_token
+from backend.app.security import CSRF_COOKIE_NAME, verify_csrf_token
 from backend.config import (
     ALLOWED_ORIGINS,
     APP_NAME,
     APP_VERSION,
-    CSRF_COOKIE_NAME,
     validate_production_config,
 )
 from backend.database import async_session_factory, init_db

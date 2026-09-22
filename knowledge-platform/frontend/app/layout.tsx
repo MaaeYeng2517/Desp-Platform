@@ -1,22 +1,33 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+import { AuthProvider } from '@/components/providers/AuthProvider';
+import { SiteFooter } from '@/components/layout/SiteFooter';
+import { SiteHeader } from '@/components/layout/SiteHeader';
 
 export const metadata: Metadata = {
-  title: 'Knowledge Engineering Platform',
-  description: 'A comprehensive platform for managing and utilizing knowledge assets',
+  title: {
+    default: 'Knowledge Platform',
+    template: '%s | Knowledge Platform',
+  },
+  description: 'แพลตฟอร์มจัดการความรู้ สืบค้น และสร้างระบบข้อมูลเชิงความรู้ด้วย AI',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="th">
+      <body>
+        <AuthProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:shadow-xl"
+          >
+            ข้ามไปยังเนื้อหาหลัก
+          </a>
+          <SiteHeader />
+          <main id="main-content">{children}</main>
+          <SiteFooter />
+        </AuthProvider>
+      </body>
     </html>
   );
 }

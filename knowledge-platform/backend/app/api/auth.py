@@ -114,7 +114,7 @@ async def register(
             user_id=user.id,
             plan_id=plan.id,
             status=SubscriptionStatus.ACTIVE,
-            metadata={"source": "registration"},
+            data={"source": "registration"},
         )
     )
     await db.commit()

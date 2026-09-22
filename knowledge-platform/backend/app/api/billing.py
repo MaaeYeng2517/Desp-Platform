@@ -158,7 +158,7 @@ async def _upsert_stripe_subscription(
             stripe_customer_id=customer_id,
             stripe_subscription_id=subscription_id,
             status=SubscriptionStatus.INCOMPLETE,
-            metadata={"source": "stripe"},
+            data={"source": "stripe"},
         )
         db.add(subscription)
     else:
@@ -183,7 +183,7 @@ async def _upsert_stripe_subscription(
     subscription.canceled_at = _utc_datetime(stripe_subscription.get("canceled_at"))
     subscription.trial_start = _utc_datetime(stripe_subscription.get("trial_start"))
     subscription.trial_end = _utc_datetime(stripe_subscription.get("trial_end"))
-    subscription.metadata = dict(metadata)
+    subscription.data = dict(metadata)
     await db.commit()
 
     if customer_id:
@@ -251,7 +251,7 @@ async def create_checkout_session(
                 plan_id=plan.id,
                 stripe_customer_id=customer_id,
                 status=SubscriptionStatus.INCOMPLETE,
-                metadata={"source": "checkout"},
+                data={"source": "checkout"},
             )
             db.add(subscription)
         user.stripe_customer_id = customer_id

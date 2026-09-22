@@ -1,6 +1,7 @@
 """Governance API endpoints"""
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
+from typing import List
 
 router = APIRouter()
 
